@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework_simplejwt.token_blacklist",
 
-# LaunchAfrica apps...
+# LaunchAfrica apps....
     'common',
     'accounts',
 ]
