@@ -28,6 +28,11 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         value = value.strip().lower()
 
+        if not value:
+            raise serializers.ValidationError(
+                "A username is required."
+            )
+
         queryset = User.objects.filter(username__iexact=value)
 
         if self.instance:
@@ -36,11 +41,6 @@ class UserSerializer(serializers.ModelSerializer):
         if queryset.exists():
             raise serializers.ValidationError(
                 "This username is already taken."
-            )
-
-        if not value:
-            raise serializers.ValidationError(
-                "A username is required."
             )
 
         return value
