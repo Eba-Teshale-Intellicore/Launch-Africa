@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -23,13 +23,13 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+type Theme = "dark" | "light";
+
 function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError<ApiErrorBody>(error)) {
     const data = error.response?.data;
 
-    if (typeof data?.detail === "string") {
-      return data.detail;
-    }
+    if (typeof data?.detail === "string") return data.detail;
 
     if (Array.isArray(data?.non_field_errors)) {
       return data.non_field_errors.join(" ");
@@ -46,9 +46,7 @@ function getErrorMessage(error: unknown): string {
               : [],
         );
 
-      if (messages.length) {
-        return messages.join(" ");
-      }
+      if (messages.length) return messages.join(" ");
     }
 
     if (!error.response) {
@@ -71,7 +69,18 @@ function getErrorMessage(error: unknown): string {
 
 export default function LoginPage() {
   const router = useRouter();
+  const [theme, setTheme] = useState<Theme>("dark");
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("la-theme") as Theme | null;
+    if (saved === "light" || saved === "dark") setTheme(saved);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    window.localStorage.setItem("la-theme", theme);
+  }, [theme]);
 
   const {
     register,
@@ -79,10 +88,7 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const mutation = useMutation({
@@ -100,24 +106,90 @@ export default function LoginPage() {
     });
   };
 
+  const toggleTheme = () =>
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          {/* Brand and heading */}
+    <main className="bg-page flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="w-full max-w-lg sm:mx-auto">
+        <div className="bg-card border-line rounded-card shadow-card p-6 sm:p-8">
+          {/* Brand + heading + theme toggle */}
           <div className="mb-7 text-center">
-            <Link
-              href="/"
-              className="mb-4 block text-2xl font-black tracking-tight text-[#101a2b]"
-            >
-              LAUNCH<span className="text-amber-500">AFRICA</span>
-            </Link>
+            <div className="mb-4 flex items-center justify-center gap-3">
+              <Link href="/" className="font-logo text-logo text-2xl">
+                LAUNCHAFRICA
+              </Link>
 
-            <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                aria-label={
+                  theme === "dark"
+                    ? "Switch to light theme"
+                    : "Switch to dark theme"
+                }
+                aria-pressed={theme === "light"}
+                title={
+                  theme === "dark"
+                    ? "Switch to light theme"
+                    : "Switch to dark theme"
+                }
+                className="btn-soft rounded-pill inline-flex size-8 items-center justify-center"
+              >
+                {theme === "dark" ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+                  </svg>
+                )}
+              </button>
+            </div>
 
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <h1 className="text-main text-2xl font-bold">Welcome back</h1>
+
+            <p className="text-soft mt-2 text-sm leading-6">
               Sign in to discover, build, and launch great ideas.
             </p>
+          </div>
+
+          {/* Google placeholder */}
+          <button
+            type="button"
+            disabled
+            title="Google sign-in is not configured yet"
+            className="btn-soft rounded-pill w-full px-4 py-3"
+          >
+            Continue with Google (coming soon)
+          </button>
+
+          <div className="divider my-6">
+            <span className="text-soft text-xs">OR Continue with email</span>
           </div>
 
           {/* Login form */}
@@ -130,11 +202,10 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-2 block text-sm font-semibold text-slate-700"
+                className="text-main mb-2 block text-sm font-semibold"
               >
                 Email address
               </label>
-
               <input
                 id="email"
                 type="email"
@@ -143,11 +214,10 @@ export default function LoginPage() {
                 aria-invalid={Boolean(errors.email)}
                 aria-describedby={errors.email ? "email-error" : undefined}
                 {...register("email")}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 aria-[invalid=true]:border-red-500"
+                className="input-box rounded-pill w-full px-4 py-3"
               />
-
               {errors.email && (
-                <p id="email-error" className="mt-1 text-sm text-red-600">
+                <p id="email-error" className="text-error mt-1 text-sm">
                   {errors.email.message}
                 </p>
               )}
@@ -158,14 +228,13 @@ export default function LoginPage() {
               <div className="mb-2 flex items-center justify-between gap-3">
                 <label
                   htmlFor="password"
-                  className="block text-sm font-semibold text-slate-700"
+                  className="text-main block text-sm font-semibold"
                 >
                   Password
                 </label>
-
                 <Link
                   href="/forgot-password"
-                  className="text-sm font-semibold text-amber-700 hover:text-amber-800"
+                  className="text-soft text-sm font-semibold underline underline-offset-2 hover:opacity-80"
                 >
                   Forgot password?
                 </Link>
@@ -182,22 +251,21 @@ export default function LoginPage() {
                     errors.password ? "password-error" : undefined
                   }
                   {...register("password")}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-3 pr-20 text-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 aria-[invalid=true]:border-red-500"
+                  className="input-box rounded-pill w-full px-4 py-3 pr-20"
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword((current) => !current)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   aria-pressed={showPassword}
-                  className="absolute inset-y-0 right-3 my-auto rounded px-2 text-sm font-semibold text-slate-500 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="text-soft hover:text-main absolute inset-y-0 right-4 my-auto rounded px-1 text-sm font-semibold focus:outline-none focus-visible:ring-2"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
 
               {errors.password && (
-                <p id="password-error" className="mt-1 text-sm text-red-600">
+                <p id="password-error" className="text-error mt-1 text-sm">
                   {errors.password.message}
                 </p>
               )}
@@ -205,43 +273,41 @@ export default function LoginPage() {
 
             {/* API error */}
             {mutation.isError && (
-              <div
+              <p
                 role="alert"
-                className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm leading-5 text-red-700"
+                className="text-error bg-input rounded-card p-3 text-sm"
               >
                 {getErrorMessage(mutation.error)}
-              </div>
+              </p>
             )}
 
             {/* Submit */}
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="w-full rounded-lg bg-[#101a2b] px-4 py-3 font-semibold text-white transition hover:bg-[#22324b] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="btn-main rounded-pill w-full px-4 py-3"
             >
               {mutation.isPending ? "Signing in…" : "Sign in"}
             </button>
           </form>
 
           {/* Registration link */}
-          <div className="my-6 flex items-center gap-4">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs text-slate-400">NEW TO LAUNCHAFRICA?</span>
-            <div className="h-px flex-1 bg-slate-200" />
+          <div className="divider my-6">
+            <span className="text-soft text-xs">NEW TO LAUNCHAFRICA?</span>
           </div>
 
-          <p className="text-center text-sm text-slate-600">
+          <p className="text-soft text-center text-sm">
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="font-bold text-amber-700 hover:text-amber-800"
+              className="text-main font-bold hover:opacity-80"
             >
               Create account
             </Link>
           </p>
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate-400">
+        <p className="text-soft mt-6 text-center text-xs">
           Discover. Build. Launch. Grow.
         </p>
       </div>

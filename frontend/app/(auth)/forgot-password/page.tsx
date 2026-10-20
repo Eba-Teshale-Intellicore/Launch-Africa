@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,13 +17,13 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
+type Theme = "dark" | "light";
+
 function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError<ApiErrorBody>(error)) {
     const data = error.response?.data;
 
-    if (typeof data?.detail === "string") {
-      return data.detail;
-    }
+    if (typeof data?.detail === "string") return data.detail;
 
     if (Array.isArray(data?.non_field_errors)) {
       return data.non_field_errors.join(" ");
@@ -39,15 +40,25 @@ function getErrorMessage(error: unknown): string {
 }
 
 export default function ForgotPasswordPage() {
+  const [theme, setTheme] = useState<Theme>("dark");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("la-theme") as Theme | null;
+    if (saved === "light" || saved === "dark") setTheme(saved);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    window.localStorage.setItem("la-theme", theme);
+  }, [theme]);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: "",
-    },
+    defaultValues: { email: "" },
   });
 
   const mutation = useMutation({
@@ -55,23 +66,75 @@ export default function ForgotPasswordPage() {
   });
 
   const onSubmit = (values: ForgotPasswordFormValues) => {
-    mutation.mutate({
-      email: values.email.trim(),
-    });
+    mutation.mutate({ email: values.email.trim() });
   };
 
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="mb-8 block text-center text-2xl font-black tracking-tight text-[#101a2b]"
-        >
-          LAUNCH<span className="text-amber-500">AFRICA</span>
-        </Link>
+  const toggleTheme = () =>
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+  return (
+    <main className="bg-page flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="w-full max-w-lg sm:mx-auto">
+        <div className="bg-card border-line rounded-card shadow-card p-6 sm:p-8">
+          {/* Brand + theme toggle */}
+          <div className="mb-6 flex items-center justify-center gap-3">
+            <Link href="/" className="font-logo text-logo text-2xl">
+              LAUNCHAFRICA
+            </Link>
+
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark"
+                  ? "Switch to light theme"
+                  : "Switch to dark theme"
+              }
+              aria-pressed={theme === "light"}
+              title={
+                theme === "dark"
+                  ? "Switch to light theme"
+                  : "Switch to dark theme"
+              }
+              className="btn-soft rounded-pill inline-flex size-8 items-center justify-center"
+            >
+              {theme === "dark" ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {/* Mail icon */}
+          <div className="bg-input text-soft rounded-card mx-auto mb-5 flex size-14 items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="28"
@@ -89,24 +152,26 @@ export default function ForgotPasswordPage() {
             </svg>
           </div>
 
+          {/* Heading */}
           <div className="mb-7 text-center">
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-main text-2xl font-bold">
               Forgot your password?
             </h1>
 
-            <p className="mt-3 text-sm leading-6 text-slate-500">
+            <p className="text-soft mt-3 text-sm leading-6">
               No worries! Enter the email address associated with your account,
               and we&apos;ll help you reset your password.
             </p>
           </div>
 
           {mutation.isSuccess ? (
+            /* Success state */
             <div
               role="status"
               aria-live="polite"
-              className="rounded-xl border border-green-200 bg-green-50 p-5 text-center"
+              className="border-line bg-input rounded-card p-5 text-center"
             >
-              <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-green-100 text-green-700">
+              <div className="bg-page text-main mx-auto mb-3 flex size-12 items-center justify-center rounded-full">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -123,9 +188,9 @@ export default function ForgotPasswordPage() {
                 </svg>
               </div>
 
-              <h2 className="font-semibold text-green-900">Check your email</h2>
+              <h2 className="text-main font-semibold">Check your email</h2>
 
-              <p className="mt-2 text-sm leading-6 text-green-800">
+              <p className="text-soft mt-2 text-sm leading-6">
                 If an account exists for that email address, reset instructions
                 will be sent. Check your inbox and spam folder.
               </p>
@@ -133,12 +198,13 @@ export default function ForgotPasswordPage() {
               <button
                 type="button"
                 onClick={() => mutation.reset()}
-                className="mt-4 text-sm font-semibold text-green-900 underline underline-offset-4"
+                className="text-main mt-4 text-sm font-semibold underline underline-offset-4 hover:opacity-80"
               >
                 Try another email
               </button>
             </div>
           ) : (
+            /* Form state */
             <form
               onSubmit={handleSubmit(onSubmit)}
               className="space-y-5"
@@ -147,7 +213,7 @@ export default function ForgotPasswordPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  className="text-main mb-2 block text-sm font-semibold"
                 >
                   Email address
                 </label>
@@ -160,11 +226,11 @@ export default function ForgotPasswordPage() {
                   aria-invalid={Boolean(errors.email)}
                   aria-describedby={errors.email ? "email-error" : undefined}
                   {...register("email")}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                  className="input-box rounded-pill w-full px-4 py-3"
                 />
 
                 {errors.email && (
-                  <p id="email-error" className="mt-1 text-sm text-red-600">
+                  <p id="email-error" className="text-error mt-1 text-sm">
                     {errors.email.message}
                   </p>
                 )}
@@ -173,7 +239,7 @@ export default function ForgotPasswordPage() {
               {mutation.isError && (
                 <p
                   role="alert"
-                  className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+                  className="text-error bg-input rounded-card p-3 text-sm"
                 >
                   {getErrorMessage(mutation.error)}
                 </p>
@@ -182,7 +248,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="w-full rounded-lg bg-[#101a2b] px-4 py-3 font-semibold text-white transition hover:bg-[#22324b] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                className="btn-main rounded-pill w-full px-4 py-3"
               >
                 {mutation.isPending
                   ? "Sending instructions…"
@@ -191,10 +257,11 @@ export default function ForgotPasswordPage() {
             </form>
           )}
 
+          {/* Back to login */}
           <div className="mt-6 text-center">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-amber-700"
+              className="text-soft hover:text-main inline-flex items-center gap-2 text-sm font-semibold"
             >
               <span aria-hidden="true">←</span>
               Back to login
@@ -202,7 +269,7 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate-400">
+        <p className="text-soft mt-6 text-center text-xs">
           Discover. Build. Launch. Grow.
         </p>
       </div>

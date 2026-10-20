@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -32,13 +33,13 @@ const registerSchema = z
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
+type Theme = "dark" | "light";
+
 function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError<ApiErrorBody>(error)) {
     const data = error.response?.data;
 
-    if (typeof data?.detail === "string") {
-      return data.detail;
-    }
+    if (typeof data?.detail === "string") return data.detail;
 
     if (Array.isArray(data?.non_field_errors)) {
       return data.non_field_errors.join(" ");
@@ -70,6 +71,17 @@ function getErrorMessage(error: unknown): string {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [theme, setTheme] = useState<Theme>("dark");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("la-theme") as Theme | null;
+    if (saved === "light" || saved === "dark") setTheme(saved);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    window.localStorage.setItem("la-theme", theme);
+  }, [theme]);
 
   const {
     register,
@@ -103,23 +115,75 @@ export default function RegisterPage() {
     });
   };
 
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <div className="mb-7 text-center">
-            <Link
-              href="/"
-              className="mb-4 block text-center text-2xl font-black tracking-tight text-[#101a2b]"
-            >
-              LAUNCH<span className="text-amber-500">AFRICA</span>
-            </Link>
+  const toggleTheme = () =>
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
 
-            <h1 className="text-2xl font-bold text-slate-900">
+  return (
+    <main className="bg-page flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="w-full max-w-lg sm:mx-auto">
+        <div className="bg-card border-line rounded-card shadow-card p-6 sm:p-8">
+          <div className="mb-7 text-center">
+            <div className="mb-4 flex items-center justify-center gap-3">
+              <Link href="/" className="font-logo text-logo text-2xl">
+                LAUNCHAFRICA
+              </Link>
+
+              <button
+                type="button"
+                onClick={toggleTheme}
+                aria-label={
+                  theme === "dark"
+                    ? "Switch to light theme"
+                    : "Switch to dark theme"
+                }
+                aria-pressed={theme === "light"}
+                title={
+                  theme === "dark"
+                    ? "Switch to light theme"
+                    : "Switch to dark theme"
+                }
+                className="btn-soft rounded-pill inline-flex size-8 items-center justify-center"
+              >
+                {theme === "dark" ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            <h1 className="text-main text-2xl font-bold">
               Create your account
             </h1>
 
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="text-soft mt-2 text-sm leading-6">
               Join the community building Africa&apos;s future.
             </p>
           </div>
@@ -128,17 +192,13 @@ export default function RegisterPage() {
             type="button"
             disabled
             title="Google sign-in is not configured yet"
-            className="w-full cursor-not-allowed rounded-lg bg-[#101a2b] px-4 py-3 font-semibold text-white opacity-60"
+            className="btn-soft rounded-pill w-full px-4 py-3"
           >
             Continue with Google (coming soon)
           </button>
 
-          <div className="my-6 flex items-center gap-4">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs text-slate-400">
-              OR Continue with email
-            </span>
-            <div className="h-px flex-1 bg-slate-200" />
+          <div className="divider my-6">
+            <span className="text-soft text-xs">OR Continue with email</span>
           </div>
 
           <form
@@ -149,7 +209,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="username"
-                className="mb-2 block text-sm font-semibold text-slate-700"
+                className="text-main mb-2 block text-sm font-semibold"
               >
                 Username
               </label>
@@ -162,10 +222,10 @@ export default function RegisterPage() {
                   errors.username ? "username-error" : undefined
                 }
                 {...register("username")}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="input-box rounded-pill w-full px-4 py-3"
               />
               {errors.username && (
-                <p id="username-error" className="mt-1 text-sm text-red-600">
+                <p id="username-error" className="text-error mt-1 text-sm">
                   {errors.username.message}
                 </p>
               )}
@@ -174,7 +234,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-2 block text-sm font-semibold text-slate-700"
+                className="text-main mb-2 block text-sm font-semibold"
               >
                 Email address
               </label>
@@ -186,10 +246,10 @@ export default function RegisterPage() {
                 aria-invalid={Boolean(errors.email)}
                 aria-describedby={errors.email ? "email-error" : undefined}
                 {...register("email")}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="input-box rounded-pill w-full px-4 py-3"
               />
               {errors.email && (
-                <p id="email-error" className="mt-1 text-sm text-red-600">
+                <p id="email-error" className="text-error mt-1 text-sm">
                   {errors.email.message}
                 </p>
               )}
@@ -198,7 +258,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="password"
-                className="mb-2 block text-sm font-semibold text-slate-700"
+                className="text-main mb-2 block text-sm font-semibold"
               >
                 Password
               </label>
@@ -212,14 +272,14 @@ export default function RegisterPage() {
                   errors.password ? "password-error" : "password-help"
                 }
                 {...register("password")}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="input-box rounded-pill w-full px-4 py-3"
               />
-              <p id="password-help" className="mt-2 text-xs text-slate-500">
+              <p id="password-help" className="text-soft mt-2 text-xs">
                 Use at least 8 characters and follow any additional password
                 rules shown.
               </p>
               {errors.password && (
-                <p id="password-error" className="mt-1 text-sm text-red-600">
+                <p id="password-error" className="text-error mt-1 text-sm">
                   {errors.password.message}
                 </p>
               )}
@@ -228,7 +288,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="password_confirm"
-                className="mb-2 block text-sm font-semibold text-slate-700"
+                className="text-main mb-2 block text-sm font-semibold"
               >
                 Confirm password
               </label>
@@ -242,10 +302,10 @@ export default function RegisterPage() {
                   errors.password_confirm ? "confirm-error" : undefined
                 }
                 {...register("password_confirm")}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="input-box rounded-pill w-full px-4 py-3"
               />
               {errors.password_confirm && (
-                <p id="confirm-error" className="mt-1 text-sm text-red-600">
+                <p id="confirm-error" className="text-error mt-1 text-sm">
                   {errors.password_confirm.message}
                 </p>
               )}
@@ -258,23 +318,20 @@ export default function RegisterPage() {
                   type="checkbox"
                   {...register("terms")}
                   aria-invalid={Boolean(errors.terms)}
-                  className="mt-1 size-4 accent-amber-500"
+                  className="mt-1 size-4"
                 />
-                <label
-                  htmlFor="terms"
-                  className="text-sm leading-5 text-slate-600"
-                >
+                <label htmlFor="terms" className="text-main text-sm leading-5">
                   I agree to the{" "}
                   <Link
                     href="/terms"
-                    className="font-semibold text-slate-900 underline underline-offset-2"
+                    className="text-main font-semibold underline underline-offset-2"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
                     href="/privacy"
-                    className="font-semibold text-slate-900 underline underline-offset-2"
+                    className="text-main font-semibold underline underline-offset-2"
                   >
                     Privacy Policy
                   </Link>
@@ -282,7 +339,7 @@ export default function RegisterPage() {
                 </label>
               </div>
               {errors.terms && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="text-error mt-1 text-sm">
                   {errors.terms.message}
                 </p>
               )}
@@ -291,14 +348,14 @@ export default function RegisterPage() {
             {mutation.isError && (
               <p
                 role="alert"
-                className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+                className="text-error bg-input rounded-card p-3 text-sm"
               >
                 {getErrorMessage(mutation.error)}
               </p>
             )}
 
             {mutation.isSuccess && (
-              <p role="status" className="text-sm text-green-700">
+              <p role="status" className="text-success text-sm">
                 Account created successfully. Redirecting…
               </p>
             )}
@@ -306,24 +363,24 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="w-full rounded-lg bg-[#101a2b] px-4 py-3 font-semibold text-white transition hover:bg-[#22324b] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="btn-main rounded-pill w-full px-4 py-3"
             >
               {mutation.isPending ? "Creating account…" : "Create account"}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-600">
+          <p className="text-soft mt-6 text-center text-sm">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="font-bold text-amber-700 hover:text-amber-800"
+              className="text-main font-bold hover:opacity-80"
             >
               Log in
             </Link>
           </p>
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate-400">
+        <p className="text-soft mt-6 text-center text-xs">
           Discover. Build. Launch. Grow.
         </p>
       </div>
