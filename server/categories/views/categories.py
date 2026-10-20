@@ -45,12 +45,10 @@ class CategoryListCreateView(generics.ListCreateAPIView):
         # permission class. New categories start inactive.
         serializer.save(is_active=False)
 
-
+# RetrieveUpdateAPIView supports retrieving and updating a single record.
 class CategoryDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = CategorySerializer
-    permission_classes = [
-        IsAdminOrReadOnly,
-    ]
+    permission_classes = [IsAdminOrReadOnly]
     lookup_field = "slug"
     http_method_names = ["get", "put", "patch", "head", "options"]
 
