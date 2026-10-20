@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 # LaunchAfrica apps....
     'common',
     'accounts',
+    'categories',
 ]
 
 AUTH_USER_MODEL = "accounts.User"
