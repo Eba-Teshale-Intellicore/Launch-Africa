@@ -21,13 +21,11 @@ class User(BaseModel, AbstractUser):
         EMAIL = "email", "Email"
         GOOGLE = "google", "Google"
 
-    # Public account identifier.
     username = models.CharField(
         max_length=30,
         unique=True,
     )
 
-    # Email is the account's login identifier.
     email = models.EmailField(
         unique=True,
     )
@@ -43,10 +41,9 @@ class User(BaseModel, AbstractUser):
         choices=Role.choices,
         default=Role.BUILDER,
     )
+    
+    is_verified = models.BooleanField(default=False)
 
-    is_verified = models.BooleanField(default=True)
-
- 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 
@@ -59,9 +56,7 @@ class User(BaseModel, AbstractUser):
             models.Index(fields=["is_active"]),
         ]
 
-
     def save(self, *args, **kwargs):
-        # Keep email formatting consistent across accounts.
         if self.email:
             self.email = self.email.strip().lower()
 

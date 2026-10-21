@@ -1,4 +1,8 @@
+
+import re
+
 from rest_framework import serializers
+
 from accounts.models.user import User
 
 
@@ -33,6 +37,11 @@ class UserSerializer(serializers.ModelSerializer):
                 "A username is required."
             )
 
+        if not re.fullmatch(r"[a-z0-9_]+", value):
+            raise serializers.ValidationError(
+                "Use only letters, numbers, and underscores."
+            )
+
         queryset = User.objects.filter(username__iexact=value)
 
         if self.instance:
@@ -44,3 +53,9 @@ class UserSerializer(serializers.ModelSerializer):
             )
 
         return value
+
+
+
+
+
+

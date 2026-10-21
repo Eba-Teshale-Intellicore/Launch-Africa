@@ -90,6 +90,17 @@ class Profile(BaseModel):
     def clean(self):
         super().clean()
 
+        text_fields = (
+            "display_name",
+            "bio",
+            "country",
+            "city",
+        )
+
+        for field_name in text_fields:
+            value = getattr(self, field_name, "")
+            setattr(self, field_name, value.strip())
+
         # Validate HTTPS URLs even when model validation
         # is explicitly called outside a form.
         url_fields = (

@@ -1,8 +1,7 @@
 # accounts/services/auth.py
-
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import IntegrityError, transaction
 
 from accounts.models.profile import Profile
 from accounts.models.user import User
@@ -21,7 +20,6 @@ EDITABLE_PROFILE_FIELDS = {
 }
 
 # create_user_with_profile
-@transaction.atomic
 def register_user(username, email, password):
     username = username.strip().lower()
     email = email.strip().lower()
@@ -29,13 +27,22 @@ def register_user(username, email, password):
     candidate = User(username=username, email=email)
     validate_password(password, user=candidate)
 
-    user = User.objects.create_user(
-        username=username,
-        email=email,
-        password=password,
-    )
+    try:
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+            )
+            profile = Profile.objects.create(user=user)
 
-    profile = Profile.objects.create(user=user)
+    except IntegrityError as exc:
+        raise ValidationError({
+            "detail": (
+                "An account with this email or username "
+                "may already exist."
+            )
+        }) from exc
 
     return user, profile
 
