@@ -44,7 +44,7 @@ class User(BaseModel, AbstractUser):
         default=Role.BUILDER,
     )
 
-    is_verified = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=True)
 
  
     USERNAME_FIELD = "email"
