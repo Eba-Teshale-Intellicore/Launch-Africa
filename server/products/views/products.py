@@ -1,15 +1,13 @@
 from django.db.models import Q
-from django.utils import timezone
 
 from rest_framework import generics, serializers
-from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from categories.models.categories import Category
 from products.models.products import Products
 from common.permissions import (
     IsAdminUserRole,
     IsOwnerOrAdminOrReadOnly,
+    is_admin,
 )
 from products.serializers.products import ProductsSerializer
 
@@ -23,21 +21,19 @@ class ProductListCreateView(generics.ListCreateAPIView):
             "owner", "category"
         )
 
-        # Public visitors see published products only.
-        if not (
-            self.request.user.is_authenticated
-            and (
-                self.request.user.is_staff
-                or self.request.user.is_superuser
-                or getattr(self.request.user, "role", None) == "admin"
+        user = self.request.user
+
+        # Administrators can see all products.
+        # Everyone else sees published products only.
+        if not (user.is_authenticated and is_admin(user)):
+            queryset = queryset.filter(
+                status=Products.Status.PUBLISHED
             )
-        ):
-            queryset = queryset.filter(status=Products.Status.PUBLISHED)
 
         return queryset.order_by("-published_at", "-created_at")
 
     def perform_create(self, serializer):
-        # The owner comes from authentication, not request JSON.
+        # Never accept ownership or initial status from request data.
         serializer.save(
             owner=self.request.user,
             status=Products.Status.DRAFT,
@@ -48,7 +44,9 @@ class ProductDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = ProductsSerializer
     permission_classes = [IsOwnerOrAdminOrReadOnly]
     lookup_field = "slug"
-    http_method_names = ["get", "put", "patch", "head", "options"]
+    http_method_names = [
+        "get", "put", "patch", "head", "options"
+    ]
 
     def get_queryset(self):
         queryset = Products.objects.select_related(
@@ -56,16 +54,8 @@ class ProductDetailView(generics.RetrieveUpdateAPIView):
         )
 
         user = self.request.user
-        is_admin = (
-            user.is_authenticated
-            and (
-                user.is_staff
-                or user.is_superuser
-                or getattr(user, "role", None) == "admin"
-            )
-        )
 
-        if is_admin:
+        if user.is_authenticated and is_admin(user):
             return queryset
 
         if user.is_authenticated:
@@ -74,20 +64,23 @@ class ProductDetailView(generics.RetrieveUpdateAPIView):
                 | Q(owner=user)
             )
 
-        return queryset.filter(status=Products.Status.PUBLISHED)
+        return queryset.filter(
+            status=Products.Status.PUBLISHED
+        )
 
     def perform_update(self, serializer):
-        product = self.get_object()
+        product = serializer.instance
+        user = self.request.user
 
-        # Do not allow editing to publish a product automatically.
-        # The serializer also makes status read-only.
-        if product.status == Products.Status.PUBLISHED:
-            # This example allows ordinary edits to published products.
-            # If your policy requires re-review after edits, implement
-            # that workflow explicitly here.
-            pass
-
-        serializer.save()
+        # Editing a published product requires moderation again.
+        # Administrators can make direct edits without this downgrade.
+        if (
+            product.status == Products.Status.PUBLISHED
+            and not is_admin(user)
+        ):
+            serializer.save(status=Products.Status.PENDING)
+        else:
+            serializer.save()
 
 
 class ProductModerationSerializer(serializers.ModelSerializer):
@@ -95,44 +88,56 @@ class ProductModerationSerializer(serializers.ModelSerializer):
         model = Products
         fields = ["status"]
 
-    def validate_status(self, value):
-        allowed = {
+    ALLOWED_TRANSITIONS = {
+        Products.Status.DRAFT: {
             Products.Status.PENDING,
+        },
+        Products.Status.PENDING: {
             Products.Status.PUBLISHED,
             Products.Status.REJECTED,
+        },
+        Products.Status.PUBLISHED: {
+            Products.Status.PENDING,
             Products.Status.ARCHIVED,
-        }
+        },
+        Products.Status.REJECTED: {
+            Products.Status.PENDING,
+        },
+        Products.Status.ARCHIVED: {
+            Products.Status.PENDING,
+        },
+    }
 
-        if value not in allowed:
+    def validate_status(self, value):
+        product = self.instance
+
+        allowed_next = self.ALLOWED_TRANSITIONS.get(
+            product.status, set()
+        )
+
+        if value not in allowed_next:
             raise serializers.ValidationError(
-                "This status is not allowed for moderation."
+                f"Cannot transition from '{product.status}' "
+                f"to '{value}'."
+            )
+
+        if (
+            value == Products.Status.PUBLISHED
+            and not product.category.is_active
+        ):
+            raise serializers.ValidationError(
+                "A product cannot be published under "
+                "an inactive category."
             )
 
         return value
 
-    def validate(self, attrs):
-        product = self.instance
-        new_status = attrs.get("status")
-
-        if (
-            new_status == Products.Status.PUBLISHED
-            and not product.category.is_active
-        ):
-            raise serializers.ValidationError(
-                "A product cannot be published under an inactive category."
-            )
-
-        return attrs
-
     def update(self, instance, validated_data):
-        new_status = validated_data["status"]
+        instance.status = validated_data["status"]
 
-        if new_status == Products.Status.PUBLISHED:
-            if not instance.published_at:
-                instance.published_at = timezone.now()
-
-        instance.status = new_status
-        instance.save(update_fields=["status", "published_at", "updated_at"])
+        # Let the model's save() method manage publication timestamps.
+        # Avoid duplicating timestamp logic here.
+        instance.save()
 
         return instance
 

@@ -16,17 +16,11 @@ class ProductCommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_product(self):
-        product = get_object_or_404(
+        return get_object_or_404(
             Products,
             slug=self.kwargs["product_slug"],
+            status=Products.Status.PUBLISHED,
         )
-
-        if product.status != Products.Status.PUBLISHED:
-            raise PermissionDenied(
-                "Comments are available only for published products."
-            )
-
-        return product
 
     def get_queryset(self):
         product = self.get_product()
@@ -41,9 +35,6 @@ class ProductCommentListCreateView(generics.ListCreateAPIView):
         )
 
     def perform_create(self, serializer):
-        if not self.request.user.is_authenticated:
-            raise PermissionDenied("Sign in to comment.")
-
         product = self.get_product()
 
         serializer.save(
@@ -55,43 +46,69 @@ class ProductCommentListCreateView(generics.ListCreateAPIView):
 class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CommentsSerializers
     permission_classes = [IsAuthenticatedOrReadOnly]
-    http_method_names = ["get", "put", "patch", "delete", "head", "options"]
+    http_method_names = [
+        "get",
+        "put",
+        "patch",
+        "delete",
+        "head",
+        "options",
+    ]
 
     def get_queryset(self):
-        queryset = Comments.objects.filter(
-            product__status=Products.Status.PUBLISHED,
-        ).select_related("author", "product")
+        queryset = Comments.objects.select_related(
+            "author",
+            "product",
+        )
 
         user = self.request.user
 
-        if is_admin(user):
+        # Admins can access comments on any product status.
+        if user.is_authenticated and is_admin(user):
             return queryset
 
+        # Non-admin users only access comments on published products.
+        queryset = queryset.filter(
+            product__status=Products.Status.PUBLISHED,
+        )
+
         if user.is_authenticated:
+            # Authors can inspect their own hidden comments,
+            # but removed comments are not exposed to ordinary users.
             return queryset.filter(
                 Q(status=Comments.Status.VISIBLE)
-                | Q(author=user)
+                | Q(
+                    author=user,
+                    status=Comments.Status.HIDDEN,
+                )
             )
 
         return queryset.filter(status=Comments.Status.VISIBLE)
 
-    def perform_update(self, serializer):
-        comment = self.get_object()
+    def check_can_modify(self, comment):
         user = self.request.user
 
-        if not is_admin(user) and comment.author_id != user.pk:
+        if user.is_authenticated and is_admin(user):
+            return
+
+        if comment.author_id != user.pk:
             raise PermissionDenied(
-                "You can edit only your own comments."
+                "You can modify only your own comments."
             )
 
+        if comment.status != Comments.Status.VISIBLE:
+            raise PermissionDenied(
+                "Only visible comments can be edited or deleted."
+            )
+
+    def perform_update(self, serializer):
+        comment = serializer.instance
+        self.check_can_modify(comment)
         serializer.save()
 
     def perform_destroy(self, instance):
-        user = self.request.user
+        self.check_can_modify(instance)
 
-        if not is_admin(user) and instance.author_id != user.pk:
-            raise PermissionDenied(
-                "You can delete only your own comments."
-            )
-
-        instance.delete()
+        # Preserve the record for moderation and audit purposes.
+        instance.status = Comments.Status.REMOVED
+        instance.save(update_fields=["status", "updated_at"])

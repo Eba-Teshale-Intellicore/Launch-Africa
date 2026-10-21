@@ -23,6 +23,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
             "product",
             "cloudinary_public_id",
             "secure_url",
+            "is_primary",
             "created_at",
             "updated_at",
         ]

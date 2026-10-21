@@ -40,7 +40,6 @@ class CommentsSerializers(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Comment cannot be empty or contain only whitespace."
             )
-
         if len(value) > 2000:
             raise serializers.ValidationError(
                 "Comment cannot exceed 2,000 characters."

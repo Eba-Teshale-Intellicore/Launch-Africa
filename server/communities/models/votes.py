@@ -11,6 +11,7 @@ class Votes(BaseModel):
         on_delete=models.CASCADE,
         related_name="votes",
     )
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -26,7 +27,10 @@ class Votes(BaseModel):
             ),
         ]
         indexes = [
-            models.Index(fields=["product", "created_at"]),
+            models.Index(
+                fields=["product", "created_at"],
+                name="vote_product_created_idx",
+            ),
         ]
 
     def __str__(self):

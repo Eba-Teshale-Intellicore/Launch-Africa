@@ -19,10 +19,13 @@ class ProductsSerializer(serializers.ModelSerializer):
         write_only=True,
     )
 
-    owner = serializers.PrimaryKeyRelatedField(read_only=True)
+    owner = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+    )
 
     class Meta:
         model = Products
+
         fields = [
             "id",
             "owner",
@@ -49,6 +52,8 @@ class ProductsSerializer(serializers.ModelSerializer):
             "owner",
             "slug",
             "status",
+            "logo_public_id",
+            "logo_url",
             "published_at",
             "created_at",
             "updated_at",
@@ -70,6 +75,16 @@ class ProductsSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError(
                 "Product tagline is required."
+            )
+
+        return value
+
+    def validate_description(self, value):
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError(
+                "Product description is required."
             )
 
         return value

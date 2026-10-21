@@ -13,6 +13,26 @@ from products.views.productimage import (
 app_name = "products"
 
 urlpatterns = [
+    # Individual image operations
+    path(
+        "images/<uuid:pk>/",
+        ProductImageDetailView.as_view(),
+        name="product-image-detail",
+    ),
+
+    # Product-specific operations
+    path(
+        "<slug:product_slug>/images/",
+        ProductImageListCreateView.as_view(),
+        name="product-image-list-create",
+    ),
+    path(
+        "<slug:slug>/moderate/",
+        ProductModerationView.as_view(),
+        name="product-moderate",
+    ),
+
+    # General product routes
     path(
         "",
         ProductListCreateView.as_view(),
@@ -22,21 +42,5 @@ urlpatterns = [
         "<slug:slug>/",
         ProductDetailView.as_view(),
         name="product-detail",
-    ),
-    path(
-        "<slug:slug>/moderate/",
-        ProductModerationView.as_view(),
-        name="product-moderate",
-    ),
-    path(
-        "<slug:product_slug>/images/",
-        ProductImageListCreateView.as_view(),
-        name="product-image-list-create",
-    ),
-
-    path(
-        "images/<uuid:pk>/",
-        ProductImageDetailView.as_view(),
-        name="product-image-detail",
     ),
 ]
