@@ -76,7 +76,7 @@ class ProductsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Product tagline is required."
             )
-
+# 
         return value
 
     def validate_description(self, value):
