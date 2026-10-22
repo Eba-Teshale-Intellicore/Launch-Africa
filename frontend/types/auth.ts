@@ -46,3 +46,8 @@ export interface ApiErrorBody {
   non_field_errors?: string[];
   [field: string]: unknown;
 }
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+  new_password_confirm: string;
+}

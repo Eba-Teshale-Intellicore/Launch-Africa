@@ -3,12 +3,13 @@ import { getAccessToken } from "@/lib/auth-session";
 
 const api = axios.create({
   baseURL:
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://127.0.0.1:8000/api/v1",
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api/v1",
+
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
+
   timeout: 15000,
 });
 

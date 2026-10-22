@@ -8,6 +8,8 @@ import {
 import type {
   ApiMessage,
   AuthResponse,
+  AuthUser,
+  ChangePasswordRequest,
   ForgotPasswordRequest,
   LoginRequest,
   RegisterRequest,
@@ -17,22 +19,14 @@ import type {
 export async function registerUser(
   payload: RegisterRequest,
 ): Promise<AuthResponse> {
-  const { data } = await api.post<AuthResponse>(
-    "/auth/register/",
-    payload,
-  );
+  const { data } = await api.post<AuthResponse>("/auth/register/", payload);
 
   setAuthTokens(data.tokens);
   return data;
 }
 
-export async function loginUser(
-  payload: LoginRequest,
-): Promise<AuthResponse> {
-  const { data } = await api.post<AuthResponse>(
-    "/auth/login/",
-    payload,
-  );
+export async function loginUser(payload: LoginRequest): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>("/auth/login/", payload);
 
   setAuthTokens(data.tokens);
   return data;
@@ -52,10 +46,7 @@ export async function requestPasswordReset(
 export async function resetPassword(
   payload: ResetPasswordRequest,
 ): Promise<ApiMessage> {
-  const { data } = await api.post<ApiMessage>(
-    "/auth/reset-password/",
-    payload,
-  );
+  const { data } = await api.post<ApiMessage>("/auth/reset-password/", payload);
 
   return data;
 }
@@ -69,13 +60,25 @@ export async function logoutUser(): Promise<ApiMessage> {
   }
 
   try {
-    const { data } = await api.post<ApiMessage>(
-      "/auth/logout/",
-      { refresh },
-    );
+    const { data } = await api.post<ApiMessage>("/auth/logout/", { refresh });
 
     return data;
   } finally {
     clearAuthSession();
   }
+}
+export async function changePassword(
+  payload: ChangePasswordRequest,
+): Promise<ApiMessage> {
+  const { data } = await api.post<ApiMessage>(
+    "/auth/change-password/",
+    payload,
+  );
+
+  return data;
+}
+
+export async function getCurrentUser(): Promise<AuthUser> {
+  const { data } = await api.get<AuthUser>("/auth/me/");
+  return data;
 }
