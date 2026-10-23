@@ -6,30 +6,39 @@ import type {
   UpdateCategoryInput,
 } from "@/src/types/category";
 
-// Get All Categories
-export async function getProduct(): Promise<Category> {
-  const res = await api.get<Category>("/categories/");
+// GET /api/v1/categories/
+export async function allCategory(): Promise<Category[]> {
+  const response = await api.get<Category[]>("/categories/");
+  return response.data;
 }
 
-// Create
+// POST /api/v1/categories/
 export async function createCategory(
   input: CreateCategoryInput,
 ): Promise<Category> {
-  const res = await api.post<Category>("/categories/", input);
-  return res.data;
+  const response = await api.post<Category>("/categories/", input);
+
+  return response.data;
 }
 
-// Read only one
+// GET /api/v1/categories/<slug>/
+export async function getCategory(slug: string): Promise<Category> {
+  const response = await api.get<Category>(
+    `/categories/${encodeURIComponent(slug)}/`,
+  );
 
-export async function getProduct(slug: string): Promise<Category> {
-  const res = await api.get<Category>("/categories/${slug}/");
+  return response.data;
 }
 
-// Update
+// PATCH /api/v1/categories/<slug>/
 export async function updateCategory(
-  id: number,
+  slug: string,
   input: UpdateCategoryInput,
 ): Promise<Category> {
-  const res = await api.put<Category>("categories/${slug}", input);
-  return res.data;
+  const response = await api.patch<Category>(
+    `/categories/${encodeURIComponent(slug)}/`,
+    input,
+  );
+
+  return response.data;
 }

@@ -8,8 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 
-import { requestPasswordReset } from "@/lib/auth";
-import type { ApiErrorBody } from "@/types/auth";
+import { requestPasswordReset } from "@/src/lib/auth";
+import type { ApiErrorBody } from "@/src/types/auth";
 
 const forgotPasswordSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),

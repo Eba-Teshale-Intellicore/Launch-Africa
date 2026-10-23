@@ -1,9 +1,9 @@
-import api from "@/lib/api";
+import api from "@/src/lib/api";
 import {
   clearAuthSession,
   getRefreshToken,
   setAuthTokens,
-} from "@/lib/auth-session";
+} from "@/src/lib/auth-session";
 
 import type {
   ApiMessage,
@@ -14,7 +14,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   ResetPasswordRequest,
-} from "@/types/auth";
+} from "@/src/types/auth";
 
 export async function registerUser(
   payload: RegisterRequest,

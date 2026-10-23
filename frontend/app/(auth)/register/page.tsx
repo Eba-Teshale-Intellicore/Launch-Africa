@@ -9,8 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 
-import { registerUser } from "@/lib/auth";
-import type { ApiErrorBody } from "@/types/auth";
+import { registerUser } from "@/src/lib/auth";
+import type { ApiErrorBody } from "@/src/types/auth";
 
 const registerSchema = z
   .object({

@@ -71,6 +71,19 @@ class CategoryDetailView(generics.RetrieveUpdateAPIView):
         # Admins may explicitly activate it via PATCH.
         serializer.save()
 
+    # def update(self, request, *args, **kwargs):
+    #     if (
+    #         request.method == "PUT"
+    #         and "is_active" in request.data
+    #     ):
+    #         raise ValidationError({
+    #             "is_active": (
+    #                 "Change category activation using PATCH."
+    #             )
+    #         })
+
+    #     return super().update(request, *args, **kwargs)
+
 
 
 

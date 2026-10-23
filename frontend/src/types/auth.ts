@@ -2,6 +2,10 @@ export interface AuthUser {
   id: number | string;
   username: string;
   email: string;
+  role?: string;
+  is_staff?: boolean;
+  is_superuser?: boolean;
+  is_active?: boolean;
 }
 
 export interface AuthTokens {

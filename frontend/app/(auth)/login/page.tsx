@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { authKeys, categoryKeys } from "@/src/hooks/useCategory";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 
-import { loginUser } from "@/lib/auth";
-import type { ApiErrorBody } from "@/types/auth";
+import { loginUser } from "@/src/lib/auth";
+import type { ApiErrorBody } from "@/src/types/auth";
 
 const loginSchema = z.object({
   email: z
@@ -91,9 +92,21 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "" },
   });
 
+  const queryClient = useQueryClient();
+
   const mutation = useMutation({
     mutationFn: loginUser,
-    onSuccess: () => {
+
+    onSuccess: async (data) => {
+      // Store the authenticated user in React Query.
+      queryClient.setQueryData(["auth", "me"], data.user);
+
+      // Refresh category data after login.
+      await queryClient.invalidateQueries({
+        queryKey: ["categories"],
+      });
+
+      // Navigate after updating the authentication state.
       router.replace("/");
       router.refresh();
     },

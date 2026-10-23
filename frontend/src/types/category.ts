@@ -1,5 +1,5 @@
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   description: string;
@@ -18,4 +18,10 @@ export interface CreateCategoryInput {
   display_order?: number;
 }
 
-export type UpdateCategoryInput = Partial<CreateCategoryInput>;
+export interface UpdateCategoryInput {
+  name?: string;
+  description?: string;
+  icon_name?: string;
+  display_order?: number;
+  is_active?: boolean;
+}

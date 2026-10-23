@@ -1,10 +1,6 @@
-
 import re
-
 from rest_framework import serializers
-
 from accounts.models.user import User
-
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,20 +9,29 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "email",
-            # "auth_provider",
-            # "role",
-            # "is_verified",
-            # "created_at",
-            # "updated_at",
+            "role",
+            "is_staff",
+            "is_superuser",
+            "is_active",
+            "is_verified",
+            "auth_provider",
+            "date_joined",
+            "created_at",
+            "updated_at",
         ]
+
         read_only_fields = [
             "id",
             "email",
-            # "auth_provider",
-            # "role",
-            # "is_verified",
-            # "created_at",
-            # "updated_at",
+            "role",
+            "is_staff",
+            "is_superuser",
+            "is_active",
+            "is_verified",
+            "auth_provider",
+            "date_joined",
+            "created_at",
+            "updated_at",
         ]
 
     def validate_username(self, value):
@@ -53,9 +58,3 @@ class UserSerializer(serializers.ModelSerializer):
             )
 
         return value
-
-
-
-
-
-
