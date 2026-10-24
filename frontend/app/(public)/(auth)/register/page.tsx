@@ -22,8 +22,8 @@ const registerSchema = z
     email: z.string().trim().email("Enter a valid email address."),
     password: z.string().min(8, "Password must contain at least 8 characters."),
     password_confirm: z.string().min(1, "Please confirm your password."),
-    terms: z.boolean().refine((accepted) => accepted, {
-      message: "You must accept the Terms of Service and Privacy Policy.",
+    terms: z.boolean().refine(Boolean, {
+      message: "Please accept the Terms of Service and Privacy Policy.",
     }),
   })
   .refine((values) => values.password === values.password_confirm, {
@@ -32,7 +32,6 @@ const registerSchema = z
   });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
-
 type Theme = "dark" | "light";
 
 function getErrorMessage(error: unknown): string {
@@ -71,11 +70,18 @@ function getErrorMessage(error: unknown): string {
 
 export default function RegisterPage() {
   const router = useRouter();
+
   const [theme, setTheme] = useState<Theme>("dark");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("la-theme") as Theme | null;
-    if (saved === "light" || saved === "dark") setTheme(saved);
+    const saved = window.localStorage.getItem("la-theme");
+
+    if (saved === "light" || saved === "dark") {
+      setTheme(saved);
+      document.documentElement.setAttribute("data-theme", saved);
+    }
   }, []);
 
   useEffect(() => {
@@ -101,29 +107,34 @@ export default function RegisterPage() {
   const mutation = useMutation({
     mutationFn: registerUser,
     onSuccess: () => {
-      router.push("/");
+      // Keep this destination if it matches your Django registration flow.
+      // If email verification is required, redirect to a verification page.
+      router.replace("/");
       router.refresh();
     },
   });
 
   const onSubmit = (values: RegisterFormValues) => {
+    mutation.reset();
+
     mutation.mutate({
-      username: values.username,
-      email: values.email,
+      username: values.username.trim(),
+      email: values.email.trim(),
       password: values.password,
       password_confirm: values.password_confirm,
     });
   };
 
-  const toggleTheme = () =>
+  const toggleTheme = () => {
     setTheme((current) => (current === "dark" ? "light" : "dark"));
+  };
 
   return (
-    <main className="bg-page flex min-h-screen items-center justify-center px-4 py-12">
+    <main className="bg-page flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 sm:py-14">
       <div className="w-full max-w-lg sm:mx-auto">
-        <div className="bg-card border-line rounded-card shadow-card p-6 sm:p-8">
-          <div className="mb-7 text-center">
-            <div className="mb-4 flex items-center justify-center gap-3">
+        <section className="bg-card border-line rounded-card border p-6 shadow-card sm:p-9">
+          <header className="mb-7 text-center">
+            <div className="mb-5 flex items-center justify-center gap-3">
               <Link href="/" className="font-logo text-logo text-2xl">
                 LAUNCHAFRICA
               </Link>
@@ -131,18 +142,9 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={toggleTheme}
-                aria-label={
-                  theme === "dark"
-                    ? "Switch to light theme"
-                    : "Switch to dark theme"
-                }
+                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
                 aria-pressed={theme === "light"}
-                title={
-                  theme === "dark"
-                    ? "Switch to light theme"
-                    : "Switch to dark theme"
-                }
-                className="btn-soft rounded-pill inline-flex size-8 items-center justify-center"
+                className="btn-soft rounded-pill inline-flex size-9 items-center justify-center"
               >
                 {theme === "dark" ? (
                   <svg
@@ -186,20 +188,25 @@ export default function RegisterPage() {
             <p className="text-soft mt-2 text-sm leading-6">
               Join the community building Africa&apos;s future.
             </p>
-          </div>
-
-          <button
-            type="button"
-            disabled
-            title="Google sign-in is not configured yet"
-            className="btn-soft rounded-pill w-full px-4 py-3"
-          >
-            Continue with Google (coming soon)
-          </button>
+          </header>
 
           <div className="divider my-6">
-            <span className="text-soft text-xs">OR Continue with email</span>
+            <span className="text-soft text-xs">SIGN UP WITH EMAIL</span>
           </div>
+          {/* <div>
+            <button
+              type="button"
+              disabled
+              title="Google sign-in is not configured yet"
+              className="btn-soft rounded-pill w-full px-4 py-3"
+            >
+              Continue with Google (coming soon)
+            </button>
+
+            <div className="divider my-6">
+              <span className="text-soft text-xs">OR Continue with email</span>
+            </div>
+          </div> */}
 
           <form
             onSubmit={handleSubmit(onSubmit)}
@@ -213,6 +220,7 @@ export default function RegisterPage() {
               >
                 Username
               </label>
+
               <input
                 id="username"
                 autoComplete="username"
@@ -224,8 +232,13 @@ export default function RegisterPage() {
                 {...register("username")}
                 className="input-box rounded-pill w-full px-4 py-3"
               />
+
               {errors.username && (
-                <p id="username-error" className="text-error mt-1 text-sm">
+                <p
+                  id="username-error"
+                  role="alert"
+                  className="text-error mt-1 text-sm"
+                >
                   {errors.username.message}
                 </p>
               )}
@@ -238,6 +251,7 @@ export default function RegisterPage() {
               >
                 Email address
               </label>
+
               <input
                 id="email"
                 type="email"
@@ -248,8 +262,13 @@ export default function RegisterPage() {
                 {...register("email")}
                 className="input-box rounded-pill w-full px-4 py-3"
               />
+
               {errors.email && (
-                <p id="email-error" className="text-error mt-1 text-sm">
+                <p
+                  id="email-error"
+                  role="alert"
+                  className="text-error mt-1 text-sm"
+                >
                   {errors.email.message}
                 </p>
               )}
@@ -262,24 +281,42 @@ export default function RegisterPage() {
               >
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="Create a password"
-                aria-invalid={Boolean(errors.password)}
-                aria-describedby={
-                  errors.password ? "password-error" : "password-help"
-                }
-                {...register("password")}
-                className="input-box rounded-pill w-full px-4 py-3"
-              />
+
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Create a password"
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={
+                    errors.password ? "password-error" : "password-help"
+                  }
+                  {...register("password")}
+                  className="input-box rounded-pill w-full px-4 py-3 pr-20"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-pressed={showPassword}
+                  className="text-soft hover:text-main absolute inset-y-0 right-4 my-auto text-sm font-semibold"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+
               <p id="password-help" className="text-soft mt-2 text-xs">
                 Use at least 8 characters and follow any additional password
-                rules shown.
+                rules enforced by the server.
               </p>
+
               {errors.password && (
-                <p id="password-error" className="text-error mt-1 text-sm">
+                <p
+                  id="password-error"
+                  role="alert"
+                  className="text-error mt-1 text-sm"
+                >
                   {errors.password.message}
                 </p>
               )}
@@ -292,20 +329,37 @@ export default function RegisterPage() {
               >
                 Confirm password
               </label>
-              <input
-                id="password_confirm"
-                type="password"
-                autoComplete="new-password"
-                placeholder="Enter your password again"
-                aria-invalid={Boolean(errors.password_confirm)}
-                aria-describedby={
-                  errors.password_confirm ? "confirm-error" : undefined
-                }
-                {...register("password_confirm")}
-                className="input-box rounded-pill w-full px-4 py-3"
-              />
+
+              <div className="relative">
+                <input
+                  id="password_confirm"
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Enter your password again"
+                  aria-invalid={Boolean(errors.password_confirm)}
+                  aria-describedby={
+                    errors.password_confirm ? "confirm-error" : undefined
+                  }
+                  {...register("password_confirm")}
+                  className="input-box rounded-pill w-full px-4 py-3 pr-20"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                  aria-pressed={showConfirmPassword}
+                  className="text-soft hover:text-main absolute inset-y-0 right-4 my-auto text-sm font-semibold"
+                >
+                  {showConfirmPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+
               {errors.password_confirm && (
-                <p id="confirm-error" className="text-error mt-1 text-sm">
+                <p
+                  id="confirm-error"
+                  role="alert"
+                  className="text-error mt-1 text-sm"
+                >
                   {errors.password_confirm.message}
                 </p>
               )}
@@ -318,28 +372,35 @@ export default function RegisterPage() {
                   type="checkbox"
                   {...register("terms")}
                   aria-invalid={Boolean(errors.terms)}
+                  aria-describedby={errors.terms ? "terms-error" : undefined}
                   className="mt-1 size-4"
                 />
+
                 <label htmlFor="terms" className="text-main text-sm leading-5">
                   I agree to the{" "}
                   <Link
                     href="/terms"
-                    className="text-main font-semibold underline underline-offset-2"
+                    className="font-semibold underline underline-offset-2"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
                     href="/privacy"
-                    className="text-main font-semibold underline underline-offset-2"
+                    className="font-semibold underline underline-offset-2"
                   >
                     Privacy Policy
                   </Link>
                   .
                 </label>
               </div>
+
               {errors.terms && (
-                <p className="text-error mt-1 text-sm">
+                <p
+                  id="terms-error"
+                  role="alert"
+                  className="text-error mt-1 text-sm"
+                >
                   {errors.terms.message}
                 </p>
               )}
@@ -348,22 +409,17 @@ export default function RegisterPage() {
             {mutation.isError && (
               <p
                 role="alert"
+                aria-live="polite"
                 className="text-error bg-input rounded-card p-3 text-sm"
               >
                 {getErrorMessage(mutation.error)}
               </p>
             )}
 
-            {mutation.isSuccess && (
-              <p role="status" className="text-success text-sm">
-                Account created successfully. Redirecting…
-              </p>
-            )}
-
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="btn-main rounded-pill w-full px-4 py-3"
+              className="btn-main rounded-pill w-full px-4 py-3 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {mutation.isPending ? "Creating account…" : "Create account"}
             </button>
@@ -378,9 +434,9 @@ export default function RegisterPage() {
               Log in
             </Link>
           </p>
-        </div>
+        </section>
 
-        <p className="text-soft mt-6 text-center text-xs">
+        <p className="text-soft mt-6 text-center text-xs tracking-wide">
           Discover. Build. Launch. Grow.
         </p>
       </div>

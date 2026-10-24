@@ -1,6 +1,15 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
+
+import { getAccessToken } from "@/src/lib/auth-session";
+import { getCurrentUser } from "@/src/lib/auth";
+import type { AuthUser } from "@/src/types/auth";
 
 import {
   allCategory,
@@ -13,10 +22,6 @@ import type {
   CreateCategoryInput,
   UpdateCategoryInput,
 } from "@/src/types/category";
-
-import api from "@/src/lib/api";
-import { getAccessToken } from "@/src/lib/auth-session";
-import type { AuthUser } from "@/src/types/auth";
 
 // React Query keys.
 export const categoryKeys = {
@@ -32,20 +37,19 @@ export const authKeys = {
   me: ["auth", "me"] as const,
 };
 
-// Fetch the authenticated user.
+// Fetch the authenticated user from Django.
 export function useCurrentUser() {
-  return useQuery({
+  return useQuery<AuthUser, Error>({
     queryKey: authKeys.me,
 
-    queryFn: async (): Promise<AuthUser> => {
-      const token = getAccessToken();
+    queryFn: async () => {
+      const accessToken = getAccessToken();
 
-      if (!token) {
+      if (!accessToken) {
         throw new Error("No access token found. Please log in.");
       }
 
-      const response = await api.get<AuthUser>("/auth/me/");
-      return response.data;
+      return getCurrentUser();
     },
 
     enabled: typeof window !== "undefined" && Boolean(getAccessToken()),
@@ -53,21 +57,23 @@ export function useCurrentUser() {
     retry: false,
     staleTime: 0,
     refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }
 
-// Call after successfully saving login tokens.
-// Pass the user object returned by the login API.
+// Call after login or when the authenticated user changes.
 export async function refreshCurrentUser(
-  queryClient: ReturnType<typeof useQueryClient>,
+  queryClient: QueryClient,
   user?: AuthUser,
 ) {
   if (user) {
     queryClient.setQueryData(authKeys.me, user);
-  } else {
+  } else if (getAccessToken()) {
     await queryClient.invalidateQueries({
       queryKey: authKeys.me,
     });
+  } else {
+    queryClient.setQueryData(authKeys.me, undefined);
   }
 
   await queryClient.invalidateQueries({
@@ -76,7 +82,8 @@ export async function refreshCurrentUser(
 }
 
 // Fetch categories.
-// Backend permissions determine which categories are returned.
+// Django remains responsible for deciding which categories
+// the authenticated user is allowed to access.
 export function useCategories(isAdmin = false) {
   return useQuery({
     queryKey: categoryKeys.list(isAdmin),
@@ -100,10 +107,10 @@ export function useCreateCategory() {
   return useMutation({
     mutationFn: (input: CreateCategoryInput) => createCategory(input),
 
-    onSuccess: (category) => {
+    onSuccess: async (category) => {
       queryClient.setQueryData(categoryKeys.detail(category.slug), category);
 
-      return queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: categoryKeys.all,
       });
     },
@@ -123,12 +130,12 @@ export function useUpdateCategory() {
       input: UpdateCategoryInput;
     }) => updateCategory(slug, input),
 
-    onSuccess: (category, variables) => {
+    onSuccess: async (category, variables) => {
       queryClient.setQueryData(categoryKeys.detail(variables.slug), category);
 
       queryClient.setQueryData(categoryKeys.detail(category.slug), category);
 
-      return queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: categoryKeys.all,
       });
     },

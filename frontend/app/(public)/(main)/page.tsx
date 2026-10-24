@@ -17,7 +17,7 @@ export default function MainPage() {
 
         <div className="mt-8 flex flex-wrap gap-4">
           <a
-            href="/categories/"
+            href="/products/"
             className="rounded-lg bg-amber-500 px-6 py-3 font-semibold text-gray-950 hover:bg-amber-400"
           >
             Explore projects

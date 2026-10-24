@@ -1,16 +1,234 @@
-/* =========================================
-   LAUNCHAFRICA — Helpers
-   File: styles/helpers.scss
-   Short classes built from design-tokens.
-   Use these in every page.
-   ========================================= */
+// /* =========================================
+//    LAUNCHAFRICA — Helpers
+//    File: styles/helpers.scss
+//    Short classes built from design-tokens.
+//    Use these in every page.
+//    ========================================= */
 
-// @import "./design-tokens";
+// // @import "./design-tokens";
+
+// @use "./design-tokens";
+
+// /* ---------- RESET ---------- */
+// *,
+// *::before,
+// *::after {
+//   box-sizing: border-box;
+// }
+
+// html {
+//   scroll-behavior: smooth;
+// }
+
+// body {
+//   margin: 0;
+//   font-family: var(--font);
+//   background: var(--bg);
+//   color: var(--text);
+//   -webkit-font-smoothing: antialiased;
+// }
+
+// button,
+// input {
+//   font: inherit;
+// }
+
+// button {
+//   cursor: pointer;
+// }
+
+// button:disabled {
+//   cursor: not-allowed;
+//   opacity: 0.6;
+// }
+
+// a {
+//   color: inherit;
+//   text-decoration: none;
+// }
+
+// ::selection {
+//   background: var(--text);
+//   color: var(--bg);
+// }
+
+// /* ---------- BACKGROUNDS ---------- */
+// .bg-page {
+//   background: var(--bg);
+// }
+// .bg-card {
+//   background: var(--card);
+// }
+// .bg-input {
+//   background: var(--input);
+// }
+
+// /* ---------- TEXT ---------- */
+// .text-main {
+//   color: var(--text);
+// }
+// .text-soft {
+//   color: var(--text-soft);
+// }
+// .text-logo {
+//   color: var(--logo);
+// }
+// .text-logo2 {
+//   color: var(--logo2);
+// }
+// .text-xs {
+//   font-size: var(--fs-xs);
+// }
+// .text-sm {
+//   font-size: var(--fs-sm);
+// }
+// .text-md {
+//   font-size: var(--fs-md);
+// }
+// .text-lg {
+//   font-size: var(--fs-lg);
+// }
+// .text-xl {
+//   font-size: var(--fs-xl);
+// }
+// .text-2xl {
+//   font-size: var(--fs-2xl);
+// }
+// .text-3xl {
+//   font-size: var(--fs-3xl);
+// }
+
+// .font-normal {
+//   font-weight: var(--fw-normal);
+// }
+// .font-semi {
+//   font-weight: var(--fw-semi);
+// }
+// .font-bold {
+//   font-weight: var(--fw-bold);
+// }
+// .font-black {
+//   font-weight: var(--fw-black);
+// }
+
+// /* logo style: black weight + tight letters */
+// .font-logo {
+//   font-weight: var(--fw-black);
+//   letter-spacing: -0.01em;
+// }
+
+// /* ---------- BORDER ---------- */
+// .border-line {
+//   border: 1px solid var(--line);
+// }
+
+// /* ---------- RADIUS ---------- */
+// .rounded-card {
+//   border-radius: var(--radius-card);
+// }
+// .rounded-pill {
+//   border-radius: var(--radius-pill);
+// }
+
+// /* ---------- SHADOW ---------- */
+// .shadow-card {
+//   box-shadow: var(--shadow-card);
+// }
+
+// /* ---------- WIDTH ---------- */
+// .w-card {
+//   width: 100%;
+//   max-width: var(--width-card);
+// }
+// .w-page {
+//   width: 100%;
+//   max-width: var(--width-page);
+// }
+
+// /* ---------- BUTTON (main) ---------- */
+// .btn-main {
+//   background: var(--btn);
+//   color: var(--btn-text);
+//   border: none;
+//   cursor: pointer;
+//   font-weight: var(--fw-semi);
+//   transition: background var(--speed) var(--ease);
+// }
+
+// .btn-main:hover {
+//   background: var(--btn-hover);
+// }
+
+// .btn-main:disabled {
+//   cursor: not-allowed;
+//   opacity: 0.6;
+// }
+
+// .btn-main:focus {
+//   outline: none;
+//   box-shadow: 0 0 0 2px var(--text-soft);
+// }
+
+// /* ---------- BUTTON (secondary / disabled) ---------- */
+// .btn-soft {
+//   background: var(--input);
+//   color: var(--text);
+//   border: none;
+//   font-weight: var(--fw-semi);
+// }
+
+// /* ---------- INPUT ---------- */
+// .input-box {
+//   background: var(--input);
+//   color: var(--text);
+//   border: none;
+//   outline: none;
+//   font-size: var(--fs-sm);
+//   transition: box-shadow var(--speed) var(--ease);
+// }
+
+// .input-box::placeholder {
+//   color: var(--text-soft);
+// }
+
+// .input-box:focus {
+//   box-shadow: 0 0 0 1px var(--text-soft);
+// }
+
+// /* ---------- DIVIDER (line + word) ---------- */
+// .divider {
+//   display: flex;
+//   align-items: center;
+//   gap: var(--space-4);
+// }
+
+// .divider::before,
+// .divider::after {
+//   content: "";
+//   flex: 1;
+//   height: 1px;
+//   background: var(--line);
+// }
+
+// /* ---------- ERROR TEXT ---------- */
+// .text-error {
+//   color: var(--error);
+// }
+// .text-success {
+//   color: var(--success);
+// }
+
 @use "./design-tokens";
 
-/* ---------- RESET (small) ---------- */
-* {
+/* ---------- RESET ---------- */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -18,15 +236,42 @@ body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--text);
+  color: var(--bg);
 }
 
 /* ---------- BACKGROUNDS ---------- */
 .bg-page {
   background: var(--bg);
 }
+
 .bg-card {
   background: var(--card);
 }
+
 .bg-input {
   background: var(--input);
 }
@@ -35,31 +280,43 @@ body {
 .text-main {
   color: var(--text);
 }
+
 .text-soft {
   color: var(--text-soft);
 }
+
 .text-logo {
   color: var(--logo);
+}
+
+.text-logo2 {
+  color: var(--logo2);
 }
 
 .text-xs {
   font-size: var(--fs-xs);
 }
+
 .text-sm {
   font-size: var(--fs-sm);
 }
+
 .text-md {
   font-size: var(--fs-md);
 }
+
 .text-lg {
   font-size: var(--fs-lg);
 }
+
 .text-xl {
   font-size: var(--fs-xl);
 }
+
 .text-2xl {
   font-size: var(--fs-2xl);
 }
+
 .text-3xl {
   font-size: var(--fs-3xl);
 }
@@ -67,20 +324,22 @@ body {
 .font-normal {
   font-weight: var(--fw-normal);
 }
+
 .font-semi {
   font-weight: var(--fw-semi);
 }
+
 .font-bold {
   font-weight: var(--fw-bold);
 }
+
 .font-black {
   font-weight: var(--fw-black);
 }
 
-/* logo style: black weight + tight letters */
 .font-logo {
   font-weight: var(--fw-black);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.045em;
 }
 
 /* ---------- BORDER ---------- */
@@ -92,6 +351,7 @@ body {
 .rounded-card {
   border-radius: var(--radius-card);
 }
+
 .rounded-pill {
   border-radius: var(--radius-pill);
 }
@@ -106,62 +366,95 @@ body {
   width: 100%;
   max-width: var(--width-card);
 }
+
 .w-page {
   width: 100%;
   max-width: var(--width-page);
 }
 
-/* ---------- BUTTON (main) ---------- */
+/* ---------- BUTTONS ---------- */
 .btn-main {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   background: var(--btn);
   color: var(--btn-text);
-  border: none;
-  cursor: pointer;
+  border: 1px solid transparent;
   font-weight: var(--fw-semi);
-  transition: background var(--speed) var(--ease);
+  transition:
+    background var(--speed) var(--ease),
+    color var(--speed) var(--ease),
+    opacity var(--speed) var(--ease),
+    transform var(--speed) var(--ease);
 }
 
-.btn-main:hover {
+.btn-main:not(:disabled):hover {
   background: var(--btn-hover);
 }
 
-.btn-main:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+.btn-main:not(:disabled):active {
+  transform: scale(0.99);
 }
 
-.btn-main:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--text-soft);
+.btn-main:focus-visible,
+.btn-soft:focus-visible {
+  outline: 2px solid var(--text-soft);
+  outline-offset: 3px;
 }
 
-/* ---------- BUTTON (secondary / disabled) ---------- */
 .btn-soft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   background: var(--input);
   color: var(--text);
-  border: none;
+  border: 1px solid var(--line);
   font-weight: var(--fw-semi);
+  transition:
+    background var(--speed) var(--ease),
+    border-color var(--speed) var(--ease);
 }
 
-/* ---------- INPUT ---------- */
+.btn-soft:hover {
+  border-color: var(--text-soft);
+}
+
+/* ---------- INPUTS ---------- */
 .input-box {
+  display: block;
+  width: 100%;
   background: var(--input);
   color: var(--text);
-  border: none;
+  border: 1px solid var(--line);
   outline: none;
   font-size: var(--fs-sm);
-  transition: box-shadow var(--speed) var(--ease);
+  transition:
+    border-color var(--speed) var(--ease),
+    box-shadow var(--speed) var(--ease);
 }
 
 .input-box::placeholder {
   color: var(--text-soft);
+  opacity: 0.8;
 }
 
 .input-box:focus {
-  box-shadow: 0 0 0 1px var(--text-soft);
+  border-color: var(--text-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-soft) 15%, transparent);
 }
 
-/* ---------- DIVIDER (line + word) ---------- */
+.input-box[aria-invalid="true"] {
+  border-color: var(--error);
+}
+
+.input-box:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- DIVIDER ---------- */
 .divider {
   display: flex;
   align-items: center;
@@ -176,10 +469,23 @@ body {
   background: var(--line);
 }
 
-/* ---------- ERROR TEXT ---------- */
+/* ---------- STATUS ---------- */
 .text-error {
   color: var(--error);
 }
+
 .text-success {
   color: var(--success);
+}
+
+/* ---------- ACCESSIBILITY ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

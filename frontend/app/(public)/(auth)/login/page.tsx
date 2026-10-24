@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authKeys, categoryKeys } from "@/src/hooks/useCategory";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 
-import { loginUser } from "@/src/lib/auth";
+import { authKeys, categoryKeys } from "@/src/hooks/useCategory";
+import { getCurrentUser, loginUser } from "@/src/lib/auth";
 import type { ApiErrorBody } from "@/src/types/auth";
 
 const loginSchema = z.object({
@@ -23,7 +23,6 @@ const loginSchema = z.object({
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
-
 type Theme = "dark" | "light";
 
 function getErrorMessage(error: unknown): string {
@@ -70,12 +69,18 @@ function getErrorMessage(error: unknown): string {
 
 export default function LoginPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const [theme, setTheme] = useState<Theme>("dark");
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("la-theme") as Theme | null;
-    if (saved === "light" || saved === "dark") setTheme(saved);
+    const saved = window.localStorage.getItem("la-theme");
+
+    if (saved === "light" || saved === "dark") {
+      setTheme(saved);
+      document.documentElement.setAttribute("data-theme", saved);
+    }
   }, []);
 
   useEffect(() => {
@@ -89,46 +94,55 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
-
-  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: loginUser,
 
-    onSuccess: async (data) => {
-      // Store the authenticated user in React Query.
-      queryClient.setQueryData(["auth", "me"], data.user);
+    onSuccess: async () => {
+      try {
+        const user = await getCurrentUser();
 
-      // Refresh category data after login.
-      await queryClient.invalidateQueries({
-        queryKey: ["categories"],
-      });
+        queryClient.setQueryData(authKeys.me, user);
 
-      // Navigate after updating the authentication state.
-      router.replace("/");
-      router.refresh();
+        await queryClient.invalidateQueries({
+          queryKey: categoryKeys.all,
+        });
+      } catch (error) {
+        // The login request already succeeded. Don't incorrectly tell the
+        // user their credentials failed because the profile request failed.
+        console.error("Could not refresh the authenticated user:", error);
+      } finally {
+        // Keep this destination if /categories is your intended landing page.
+        router.replace("/categories");
+        router.refresh();
+      }
     },
   });
 
   const onSubmit = (values: LoginFormValues) => {
+    mutation.reset();
+
     mutation.mutate({
       email: values.email.trim(),
       password: values.password,
     });
   };
 
-  const toggleTheme = () =>
+  const toggleTheme = () => {
     setTheme((current) => (current === "dark" ? "light" : "dark"));
+  };
 
   return (
     <main className="bg-page flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg sm:mx-auto">
-        <div className="bg-card border-line rounded-card shadow-card p-6 sm:p-8">
-          {/* Brand + heading + theme toggle */}
-          <div className="mb-7 text-center">
-            <div className="mb-4 flex items-center justify-center gap-3">
+        <section className="bg-card border-line rounded-card shadow-card border p-6 sm:p-8">
+          <header className="mb-7 text-center">
+            <div className="mb-5 flex items-center justify-center gap-3">
               <Link href="/" className="font-logo text-logo text-2xl">
                 LAUNCHAFRICA
               </Link>
@@ -136,18 +150,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={toggleTheme}
-                aria-label={
-                  theme === "dark"
-                    ? "Switch to light theme"
-                    : "Switch to dark theme"
-                }
+                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
                 aria-pressed={theme === "light"}
-                title={
-                  theme === "dark"
-                    ? "Switch to light theme"
-                    : "Switch to dark theme"
-                }
-                className="btn-soft rounded-pill inline-flex size-8 items-center justify-center"
+                className="btn-soft rounded-pill inline-flex size-9 items-center justify-center"
               >
                 {theme === "dark" ? (
                   <svg
@@ -189,29 +194,31 @@ export default function LoginPage() {
             <p className="text-soft mt-2 text-sm leading-6">
               Sign in to discover, build, and launch great ideas.
             </p>
-          </div>
-
-          {/* Google placeholder */}
-          <button
-            type="button"
-            disabled
-            title="Google sign-in is not configured yet"
-            className="btn-soft rounded-pill w-full px-4 py-3"
-          >
-            Continue with Google (coming soon)
-          </button>
+          </header>
 
           <div className="divider my-6">
-            <span className="text-soft text-xs">OR Continue with email</span>
+            <span className="text-soft text-xs">SIGN IN WITH EMAIL</span>
           </div>
+          {/* <div>
+            <button
+              type="button"
+              disabled
+              title="Google sign-in is not configured yet"
+              className="btn-soft rounded-pill w-full px-4 py-3"
+            >
+              Continue with Google (coming soon)
+            </button>
 
-          {/* Login form */}
+            <div className="divider my-6">
+              <span className="text-soft text-xs">OR Continue with email</span>
+            </div>
+          </div> */}
+
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-5"
             noValidate
           >
-            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -219,6 +226,7 @@ export default function LoginPage() {
               >
                 Email address
               </label>
+
               <input
                 id="email"
                 type="email"
@@ -229,14 +237,18 @@ export default function LoginPage() {
                 {...register("email")}
                 className="input-box rounded-pill w-full px-4 py-3"
               />
+
               {errors.email && (
-                <p id="email-error" className="text-error mt-1 text-sm">
+                <p
+                  id="email-error"
+                  role="alert"
+                  className="text-error mt-1 text-sm"
+                >
                   {errors.email.message}
                 </p>
               )}
             </div>
 
-            {/* Password */}
             <div>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <label
@@ -245,6 +257,7 @@ export default function LoginPage() {
                 >
                   Password
                 </label>
+
                 <Link
                   href="/forgot-password"
                   className="text-soft text-sm font-semibold underline underline-offset-2 hover:opacity-80"
@@ -266,45 +279,48 @@ export default function LoginPage() {
                   {...register("password")}
                   className="input-box rounded-pill w-full px-4 py-3 pr-20"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword((current) => !current)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   aria-pressed={showPassword}
-                  className="text-soft hover:text-main absolute inset-y-0 right-4 my-auto rounded px-1 text-sm font-semibold focus:outline-none focus-visible:ring-2"
+                  className="text-soft hover:text-main absolute inset-y-0 right-4 my-auto text-sm font-semibold"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
 
               {errors.password && (
-                <p id="password-error" className="text-error mt-1 text-sm">
+                <p
+                  id="password-error"
+                  role="alert"
+                  className="text-error mt-1 text-sm"
+                >
                   {errors.password.message}
                 </p>
               )}
             </div>
 
-            {/* API error */}
             {mutation.isError && (
               <p
                 role="alert"
+                aria-live="polite"
                 className="text-error bg-input rounded-card p-3 text-sm"
               >
                 {getErrorMessage(mutation.error)}
               </p>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="btn-main rounded-pill w-full px-4 py-3"
+              className="btn-main rounded-pill w-full px-4 py-3 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {mutation.isPending ? "Signing in…" : "Sign in"}
             </button>
           </form>
 
-          {/* Registration link */}
           <div className="divider my-6">
             <span className="text-soft text-xs">NEW TO LAUNCHAFRICA?</span>
           </div>
@@ -318,7 +334,7 @@ export default function LoginPage() {
               Create account
             </Link>
           </p>
-        </div>
+        </section>
 
         <p className="text-soft mt-6 text-center text-xs">
           Discover. Build. Launch. Grow.

@@ -6,6 +6,24 @@ interface CategoryListProps {
   isAdmin: boolean;
 }
 
+function FolderIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 7a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+    </svg>
+  );
+}
 export default function CategoryList({ isAdmin }: CategoryListProps) {
   const {
     data: categories,
@@ -19,131 +37,150 @@ export default function CategoryList({ isAdmin }: CategoryListProps) {
 
   if (isPending) {
     return (
-      <section className="space-y-4">
-        <h2 className="text-main text-xl font-semibold">Explore categories</h2>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className="bg-card border-line rounded-card shadow-card animate-pulse p-5"
-            >
-              <div className="bg-input mb-3 h-3 w-16 rounded" />
-              <div className="bg-input mb-3 h-5 w-3/4 rounded" />
-              <div className="bg-input mb-2 h-3 w-full rounded" />
-              <div className="bg-input mb-4 h-3 w-2/3 rounded" />
-              <div className="bg-input h-3 w-24 rounded" />
-            </div>
-          ))}
-        </div>
+      <section
+        aria-label="Loading categories"
+        aria-busy="true"
+        className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="bg-card border-line rounded-card shadow-card animate-pulse border p-6"
+          >
+            <div className="bg-input mb-5 size-12 rounded-2xl" />
+            <div className="bg-input mb-3 h-5 w-2/3 rounded" />
+            <div className="bg-input mb-2 h-3 w-full rounded" />
+            <div className="bg-input h-3 w-4/5 rounded" />
+            <div className="bg-input mt-8 h-9 w-28 rounded-full" />
+          </div>
+        ))}
       </section>
     );
   }
 
   if (isError) {
     return (
-      <section className="space-y-4">
-        <h2 className="text-main text-xl font-semibold">Explore categories</h2>
-
-        <div className="bg-card border-line rounded-card shadow-card w-card mx-auto p-6 sm:p-8">
-          <p role="alert" className="text-error text-sm">
-            Could not load categories: {error.message}
-          </p>
-
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="btn-main rounded-pill mt-4 w-full px-4 py-3"
-          >
-            Try again
-          </button>
+      <section className="bg-card border-line rounded-card mx-auto max-w-xl border p-8 text-center">
+        <div className="text-error mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-[var(--input)]">
+          !
         </div>
+
+        <h2 className="text-main text-lg font-bold">
+          Could not load categories
+        </h2>
+
+        <p className="text-soft mt-2 text-sm leading-6">
+          {error instanceof Error
+            ? error.message
+            : "Something went wrong while loading categories."}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="btn-main rounded-pill mt-6 px-6 py-3 text-sm"
+        >
+          Try again
+        </button>
       </section>
     );
   }
 
   if (!categories?.length) {
     return (
-      <section className="space-y-4">
-        <h2 className="text-main text-xl font-semibold">Explore categories</h2>
-
-        <div className="bg-card border-line rounded-card shadow-card w-card mx-auto p-8 text-center">
-          <div className="bg-input rounded-pill mx-auto mb-4 inline-flex size-12 items-center justify-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="text-soft"
-            >
-              <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
-            </svg>
-          </div>
-
-          <p className="text-main text-sm font-semibold">
-            {isAdmin ? "No categories yet" : "No active categories yet"}
-          </p>
-
-          <p className="text-soft mt-1 text-sm">
-            {isAdmin
-              ? "Create a category to get started."
-              : "Categories appear here once an administrator activates them."}
-          </p>
+      <section className="bg-card border-line rounded-card mx-auto max-w-xl border px-6 py-12 text-center sm:px-10">
+        <div className="bg-input text-soft mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl">
+          <FolderIcon />
         </div>
+
+        <h2 className="text-main text-lg font-bold">
+          {isAdmin ? "Your categories start here" : "No categories available"}
+        </h2>
+
+        <p className="text-soft mx-auto mt-3 max-w-sm text-sm leading-6">
+          {isAdmin
+            ? "Create your first category to organize products across the African innovation ecosystem."
+            : "Categories will appear here when an administrator activates them."}
+        </p>
       </section>
     );
   }
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-main text-xl font-semibold">Explore categories</h2>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <section aria-label="Product categories">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {categories.map((category) => (
           <article
             key={category.id}
-            className="bg-card border-line rounded-card shadow-card p-5 transition hover:opacity-95"
+            className="bg-card border-line rounded-card group relative flex min-w-0 flex-col border p-5 transition duration-200 hover:-translate-y-1 hover:border-[var(--text-soft)] hover:shadow-card sm:p-6"
           >
-            <p className="text-soft mb-2 text-xs font-semibold uppercase tracking-wide">
-              {category.icon_name || "Category"}
-            </p>
+            <div className="flex items-start gap-4">
+              <div>
+                {category.icon_name === "folder" ? (
+                  <p className="text-soft mb-2 text-xs font-semibold uppercase tracking-wide">
+                    {category.icon_name || "Category"}
+                  </p>
+                ) : (
+                  <div className="bg-input text-soft flex size-12 shrink-0 items-center justify-center rounded-2xl transition-colors group-hover:text-logo2">
+                    <FolderIcon />
+                  </div>
+                )}
+              </div>
 
-            <h3 className="text-main text-lg font-bold">{category.name}</h3>
-
-            <p className="text-soft mt-2 text-sm leading-6">
-              {category.description || "No description yet."}
-            </p>
-
-            <p className="text-soft border-line mt-4 border-t pt-3 text-xs">
-              {category.product_count} published{" "}
-              {category.product_count === 1 ? "product" : "products"}
-            </p>
-
-            {isAdmin && (
-              <div className="border-line mt-4 border-t pt-4">
-                <p className="text-soft mb-3 text-sm">
-                  Status:{" "}
-                  <span className="font-semibold">
+              <div className="min-w-0 flex-1 pt-1">
+                <h2 className="text-main break-words text-lg font-bold tracking-tight">
+                  {category.name}
+                </h2>
+                {isAdmin && (
+                  <span
+                    className={`mt-2 inline-flex items-center gap-2 text-xs font-semibold ${
+                      category.is_active ? "text-success" : "text-soft"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`size-1.5 rounded-full ${
+                        category.is_active
+                          ? "bg-[var(--success)]"
+                          : "bg-[var(--text-soft)]"
+                      }`}
+                    />
                     {category.is_active ? "Active" : "Inactive"}
                   </span>
-                </p>
+                )}
 
+                <p className="text-soft mt-2 min-h-12 text-sm leading-6">
+                  {category.description || "Explore products in this sector."}
+                </p>
+              </div>
+            </div>
+
+            <div
+              className="mt-6 flex items-center justify-between"
+              // border-t border-[var(--line)]
+            >
+              <span className="bg-input text-main rounded-pill inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold">
+                <span className="text-logo2 font-bold">
+                  {category.product_count}
+                </span>
+                {category.product_count === 1 ? "product" : "products"}
+              </span>
+            </div>
+
+            {isAdmin && (
+              <div className="mt-4 border-t border-[var(--line)] pt-4">
                 <button
                   type="button"
                   disabled={updateCategory.isPending}
                   onClick={() =>
                     updateCategory.mutate({
                       slug: category.slug,
-                      input: { is_active: !category.is_active },
+                      input: {
+                        is_active: !category.is_active,
+                      },
                     })
                   }
-                  className="btn-main rounded-pill w-full px-4 py-3 disabled:opacity-50"
+                  className="btn-soft rounded-pill w-full px-4 py-3 text-sm disabled:opacity-50"
                 >
                   {updateCategory.isPending
                     ? "Updating..."

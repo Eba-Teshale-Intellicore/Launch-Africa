@@ -12,7 +12,11 @@ import { requestPasswordReset } from "@/src/lib/auth";
 import type { ApiErrorBody } from "@/src/types/auth";
 
 const forgotPasswordSchema = z.object({
-  email: z.string().trim().email("Enter a valid email address."),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email address is required.")
+    .email("Enter a valid email address."),
 });
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
@@ -43,8 +47,12 @@ export default function ForgotPasswordPage() {
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("la-theme") as Theme | null;
-    if (saved === "light" || saved === "dark") setTheme(saved);
+    const saved = window.localStorage.getItem("la-theme");
+
+    if (saved === "light" || saved === "dark") {
+      setTheme(saved);
+      document.documentElement.setAttribute("data-theme", saved);
+    }
   }, []);
 
   useEffect(() => {
@@ -58,7 +66,9 @@ export default function ForgotPasswordPage() {
     formState: { errors },
   } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: { email: "" },
+    defaultValues: {
+      email: "",
+    },
   });
 
   const mutation = useMutation({
@@ -66,112 +76,109 @@ export default function ForgotPasswordPage() {
   });
 
   const onSubmit = (values: ForgotPasswordFormValues) => {
-    mutation.mutate({ email: values.email.trim() });
+    mutation.reset();
+
+    mutation.mutate({
+      email: values.email.trim(),
+    });
   };
 
-  const toggleTheme = () =>
+  const toggleTheme = () => {
     setTheme((current) => (current === "dark" ? "light" : "dark"));
+  };
 
   return (
     <main className="bg-page flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg sm:mx-auto">
-        <div className="bg-card border-line rounded-card shadow-card p-6 sm:p-8">
-          {/* Brand + theme toggle */}
-          <div className="mb-6 flex items-center justify-center gap-3">
-            <Link href="/" className="font-logo text-logo text-2xl">
-              LAUNCHAFRICA
-            </Link>
+        <section className="bg-card border-line rounded-card shadow-card border p-6 sm:p-8">
+          {/* Brand and theme toggle */}
+          <header className="mb-7 text-center">
+            <div className="mb-5 flex items-center justify-center gap-3">
+              <Link href="/" className="font-logo text-logo text-2xl">
+                LAUNCHAFRICA
+              </Link>
 
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label={
-                theme === "dark"
-                  ? "Switch to light theme"
-                  : "Switch to dark theme"
-              }
-              aria-pressed={theme === "light"}
-              title={
-                theme === "dark"
-                  ? "Switch to light theme"
-                  : "Switch to dark theme"
-              }
-              className="btn-soft rounded-pill inline-flex size-8 items-center justify-center"
-            >
-              {theme === "dark" ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
-                </svg>
-              )}
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                aria-label={`Switch to ${
+                  theme === "dark" ? "light" : "dark"
+                } theme`}
+                aria-pressed={theme === "light"}
+                className="btn-soft rounded-pill inline-flex size-9 items-center justify-center"
+              >
+                {theme === "dark" ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+                  </svg>
+                )}
+              </button>
+            </div>
 
-          {/* Mail icon */}
-          <div className="bg-input text-soft rounded-card mx-auto mb-5 flex size-14 items-center justify-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="3" y="5" width="18" height="14" rx="2" />
-              <path d="m3 7 9 6 9-6" />
-            </svg>
-          </div>
+            {/* Mail icon */}
+            <div className="bg-input text-soft rounded-card mx-auto mb-5 flex size-14 items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="m3 7 9 6 9-6" />
+              </svg>
+            </div>
 
-          {/* Heading */}
-          <div className="mb-7 text-center">
             <h1 className="text-main text-2xl font-bold">
               Forgot your password?
             </h1>
 
             <p className="text-soft mt-3 text-sm leading-6">
-              No worries! Enter the email address associated with your account,
-              and we&apos;ll help you reset your password.
+              It happens. Enter your email address and we&apos;ll help you get
+              back into your account.
             </p>
-          </div>
+          </header>
 
+          {/* Success state */}
           {mutation.isSuccess ? (
-            /* Success state */
             <div
               role="status"
               aria-live="polite"
-              className="border-line bg-input rounded-card p-5 text-center"
+              className="border-line bg-input rounded-card border p-5 text-center"
             >
-              <div className="bg-page text-main mx-auto mb-3 flex size-12 items-center justify-center rounded-full">
+              <div className="bg-page text-main mx-auto mb-4 flex size-12 items-center justify-center rounded-full">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -191,14 +198,15 @@ export default function ForgotPasswordPage() {
               <h2 className="text-main font-semibold">Check your email</h2>
 
               <p className="text-soft mt-2 text-sm leading-6">
-                If an account exists for that email address, reset instructions
-                will be sent. Check your inbox and spam folder.
+                If an account exists for that email address, you&apos;ll receive
+                instructions to reset your password. Check your inbox and spam
+                folder.
               </p>
 
               <button
                 type="button"
                 onClick={() => mutation.reset()}
-                className="text-main mt-4 text-sm font-semibold underline underline-offset-4 hover:opacity-80"
+                className="text-main mt-5 text-sm font-semibold underline underline-offset-4 hover:opacity-80"
               >
                 Try another email
               </button>
@@ -222,6 +230,7 @@ export default function ForgotPasswordPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
+                  inputMode="email"
                   placeholder="you@example.com"
                   aria-invalid={Boolean(errors.email)}
                   aria-describedby={errors.email ? "email-error" : undefined}
@@ -230,7 +239,11 @@ export default function ForgotPasswordPage() {
                 />
 
                 {errors.email && (
-                  <p id="email-error" className="text-error mt-1 text-sm">
+                  <p
+                    id="email-error"
+                    role="alert"
+                    className="text-error mt-1 text-sm"
+                  >
                     {errors.email.message}
                   </p>
                 )}
@@ -239,6 +252,7 @@ export default function ForgotPasswordPage() {
               {mutation.isError && (
                 <p
                   role="alert"
+                  aria-live="polite"
                   className="text-error bg-input rounded-card p-3 text-sm"
                 >
                   {getErrorMessage(mutation.error)}
@@ -248,7 +262,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="btn-main rounded-pill w-full px-4 py-3"
+                className="btn-main rounded-pill w-full px-4 py-3 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {mutation.isPending
                   ? "Sending instructions…"
@@ -257,7 +271,7 @@ export default function ForgotPasswordPage() {
             </form>
           )}
 
-          {/* Back to login */}
+          {/* Navigation */}
           <div className="mt-6 text-center">
             <Link
               href="/login"
@@ -267,7 +281,7 @@ export default function ForgotPasswordPage() {
               Back to login
             </Link>
           </div>
-        </div>
+        </section>
 
         <p className="text-soft mt-6 text-center text-xs">
           Discover. Build. Launch. Grow.

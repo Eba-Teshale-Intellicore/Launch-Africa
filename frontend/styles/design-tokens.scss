@@ -14,6 +14,8 @@
   --text: #ffffff;
   --text-soft: #adadad;
   --logo: #d9d9d9;
+  // --logo2: #ff6b6b;
+  --logo2: #ffea0c;
 
   --btn: #ffffff;
   --btn-hover: #e5e5e5;
@@ -72,7 +74,27 @@
   --speed: 180ms;
   --ease: ease;
 }
+/* ---------- LIGHT THEME OVERRIDES ---------- */
+[data-theme="light"] {
+  --bg: #f7f7f7;
+  --card: #ffffff;
+  --input: #f0f0f0;
+  --line: #d9d9d9;
 
+  --text: #141414;
+  --text-soft: #5c5c5c;
+  --logo: #141414;
+  --logo2: #d97706;
+
+  --btn: #141414;
+  --btn-hover: #2a2a2a;
+  --btn-text: #ffffff;
+
+  --error: #d92d20;
+  --success: #15803d;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
 /* ---------- MOBILE TWEAKS (under 640px) ---------- */
 @media (max-width: 639px) {
   :root {
@@ -109,24 +131,4 @@ $xl: 1280px;
   } @else {
     @error "Unknown size: #{$size}";
   }
-}
-/* ---------- LIGHT THEME OVERRIDES ---------- */
-[data-theme="light"] {
-  --bg: #f7f7f7;
-  --card: #ffffff;
-  --input: #f0f0f0;
-  --line: #d9d9d9;
-
-  --text: #141414;
-  --text-soft: #5c5c5c;
-  --logo: #141414;
-
-  --btn: #141414;
-  --btn-hover: #2a2a2a;
-  --btn-text: #ffffff;
-
-  --error: #d92d20;
-  --success: #15803d;
-
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
