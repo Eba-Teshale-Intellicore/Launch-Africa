@@ -9,8 +9,6 @@ import {
 
 import { getAccessToken } from "@/src/lib/auth-session";
 import { getCurrentUser } from "@/src/lib/auth";
-import type { AuthUser } from "@/src/types/auth";
-
 import {
   allCategory,
   createCategory,
@@ -18,6 +16,7 @@ import {
   updateCategory,
 } from "@/src/lib/category";
 
+import type { AuthUser } from "@/src/types/auth";
 import type {
   CreateCategoryInput,
   UpdateCategoryInput,
@@ -28,9 +27,10 @@ export const categoryKeys = {
   all: ["categories"] as const,
 
   list: (isAdmin: boolean) =>
-    ["categories", isAdmin ? "admin" : "public"] as const,
+    ["categories", "list", isAdmin ? "admin" : "public"] as const,
 
-  detail: (slug: string) => ["categories", "detail", slug] as const,
+  detail: (slug: string, isAdmin: boolean) =>
+    ["categories", "detail", isAdmin ? "admin" : "public", slug] as const,
 };
 
 export const authKeys = {
@@ -46,7 +46,7 @@ export function useCurrentUser() {
       const accessToken = getAccessToken();
 
       if (!accessToken) {
-        throw new Error("No access token found. Please log in.");
+        throw new Error("Please sign in.");
       }
 
       return getCurrentUser();
@@ -80,7 +80,17 @@ export async function refreshCurrentUser(
     queryKey: categoryKeys.all,
   });
 }
+export async function clearFrontendAuthState(queryClient: QueryClient) {
+  queryClient.setQueryData(authKeys.me, undefined);
 
+  await queryClient.cancelQueries({
+    queryKey: categoryKeys.all,
+  });
+
+  queryClient.removeQueries({
+    queryKey: categoryKeys.all,
+  });
+}
 // Fetch categories.
 // Django remains responsible for deciding which categories
 // the authenticated user is allowed to access.
@@ -92,9 +102,9 @@ export function useCategories(isAdmin = false) {
 }
 
 // Fetch one category.
-export function useCategory(slug: string) {
+export function useCategory(slug: string, isAdmin = false) {
   return useQuery({
-    queryKey: categoryKeys.detail(slug),
+    queryKey: categoryKeys.detail(slug, isAdmin),
     queryFn: () => getCategory(slug),
     enabled: Boolean(slug),
   });
@@ -108,7 +118,10 @@ export function useCreateCategory() {
     mutationFn: (input: CreateCategoryInput) => createCategory(input),
 
     onSuccess: async (category) => {
-      queryClient.setQueryData(categoryKeys.detail(category.slug), category);
+      queryClient.setQueryData(
+        categoryKeys.detail(category.slug, true),
+        category,
+      );
 
       await queryClient.invalidateQueries({
         queryKey: categoryKeys.all,
@@ -130,10 +143,16 @@ export function useUpdateCategory() {
       input: UpdateCategoryInput;
     }) => updateCategory(slug, input),
 
-    onSuccess: async (category, variables) => {
-      queryClient.setQueryData(categoryKeys.detail(variables.slug), category);
+    onSuccess: async (category) => {
+      queryClient.setQueryData(
+        categoryKeys.detail(category.slug, true),
+        category,
+      );
 
-      queryClient.setQueryData(categoryKeys.detail(category.slug), category);
+      queryClient.setQueryData(
+        categoryKeys.detail(category.slug, false),
+        category,
+      );
 
       await queryClient.invalidateQueries({
         queryKey: categoryKeys.all,

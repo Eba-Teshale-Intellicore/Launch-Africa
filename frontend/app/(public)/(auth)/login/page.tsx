@@ -78,8 +78,13 @@ export default function LoginPage() {
     const saved = window.localStorage.getItem("la-theme");
 
     if (saved === "light" || saved === "dark") {
-      setTheme(saved);
       document.documentElement.setAttribute("data-theme", saved);
+
+      const frame = window.requestAnimationFrame(() => {
+        setTheme(saved);
+      });
+
+      return () => window.cancelAnimationFrame(frame);
     }
   }, []);
 

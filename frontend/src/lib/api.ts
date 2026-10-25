@@ -9,8 +9,10 @@ import {
 
 import type { AuthTokens } from "@/src/types/auth";
 
-const baseURL =
+const rawBaseURL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api/v1";
+
+const baseURL = rawBaseURL.replace(/\/+$/, "");
 
 const api = axios.create({
   baseURL,
@@ -32,15 +34,17 @@ interface RefreshResponse {
   refresh?: string;
 }
 
+function isAuthEndpoint(url = ""): boolean {
+  return [
+    "/auth/login/",
+    "/auth/register/",
+    "/auth/token/refresh/",
+    "/auth/logout/",
+  ].some((endpoint) => url.includes(endpoint));
+}
+
 api.interceptors.request.use((config) => {
-  const url = config.url ?? "";
-
-  const isAuthEndpoint =
-    url.includes("/auth/login/") ||
-    url.includes("/auth/register/") ||
-    url.includes("/auth/token/refresh/");
-
-  if (isAuthEndpoint) {
+  if (isAuthEndpoint(config.url)) {
     delete config.headers.Authorization;
     return config;
   }
@@ -91,7 +95,7 @@ async function refreshAccessToken(): Promise<string> {
         setAuthTokens(tokens);
         return tokens.access;
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         clearAuthSession();
         throw error;
       })
@@ -105,22 +109,19 @@ async function refreshAccessToken(): Promise<string> {
 
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const request = error.config as InternalAxiosRequestConfig | undefined;
-
-    if (!request || error.response?.status !== 401) {
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error)) {
       return Promise.reject(error);
     }
 
-    const url = request.url ?? "";
+    const request = error.config as InternalAxiosRequestConfig | undefined;
 
-    const isAuthEndpoint =
-      url.includes("/auth/login/") ||
-      url.includes("/auth/register/") ||
-      url.includes("/auth/token/refresh/") ||
-      url.includes("/auth/logout/");
-
-    if (isAuthEndpoint || request._retry) {
+    if (
+      !request ||
+      error.response?.status !== 401 ||
+      request._retry ||
+      isAuthEndpoint(request.url)
+    ) {
       return Promise.reject(error);
     }
 

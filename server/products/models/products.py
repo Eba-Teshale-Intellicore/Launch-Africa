@@ -34,8 +34,8 @@ def validate_languages(value):
             r"[a-z]{2,3}", language
         ):
             raise ValidationError(
-                "Each language must be a valid lowercase "
-                "two- or three-letter language code."
+                "Each language must be a lowercase two- or "
+                "three-letter language code."
             )
 
     if len(value) != len(set(value)):
@@ -66,7 +66,6 @@ class Products(BaseModel):
     )
 
     tagline = models.CharField(max_length=120)
-
     description = models.TextField(max_length=5000)
 
     website_url = models.URLField(
@@ -93,10 +92,7 @@ class Products(BaseModel):
         db_index=True,
     )
 
-    logo_public_id = models.CharField(
-        max_length=255,
-        blank=True,
-    )
+    logo_public_id = models.CharField(max_length=255, blank=True)
 
     logo_url = models.URLField(
         max_length=500,
@@ -127,15 +123,17 @@ class Products(BaseModel):
         indexes = [
             models.Index(
                 fields=["category", "status", "-published_at"],
+                name="product_cat_status_pub_idx",
+            ),
+            models.Index(
+                fields=["owner", "status"],
+                name="product_owner_status_idx",
             ),
         ]
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = (
-                slugify(self.title)[:180].strip("-") or "product"
-            )
-
+            base_slug = slugify(self.title)[:180].strip("-") or "product"
             candidate = base_slug
             number = 2
 
@@ -162,23 +160,31 @@ class Products(BaseModel):
                 .first()
             )
 
-        # Set the timestamp on initial publication or republishing.
-        if (
-            self.status == self.Status.PUBLISHED
-            and (
+        # published_at means the most recent publication time.
+        if self.status == self.Status.PUBLISHED:
+            if (
                 previous_status != self.Status.PUBLISHED
                 or self.published_at is None
-            )
-        ):
-            self.published_at = timezone.now()
+            ):
+                self.published_at = timezone.now()
 
-            # Ensure the timestamp is persisted when callers
-            # use save(update_fields=[...]).
-            update_fields = kwargs.get("update_fields")
-            if update_fields is not None:
-                kwargs["update_fields"] = set(update_fields) | {
-                    "published_at"
-                }
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            update_fields = set(update_fields)
+
+            if "slug" in update_fields or not self.pk:
+                update_fields.add("slug")
+
+            if (
+                self.status == self.Status.PUBLISHED
+                and (
+                    previous_status != self.Status.PUBLISHED
+                    or self.published_at is None
+                )
+            ):
+                update_fields.add("published_at")
+
+            kwargs["update_fields"] = update_fields
 
         super().save(*args, **kwargs)
 

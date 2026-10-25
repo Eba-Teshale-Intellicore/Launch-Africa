@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function MainPage() {
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-16 text-gray-900">
@@ -16,12 +18,12 @@ export default function MainPage() {
         </p>
 
         <div className="mt-8 flex flex-wrap gap-4">
-          <a
+          <Link
             href="/products/"
             className="rounded-lg bg-amber-500 px-6 py-3 font-semibold text-gray-950 hover:bg-amber-400"
           >
             Explore projects
-          </a>
+          </Link>
 
           <a
             href="/register"

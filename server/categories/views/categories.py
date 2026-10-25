@@ -6,6 +6,31 @@ from categories.models.categories import Category
 from categories.serializers.categories import CategorySerializer
 from common.permissions import IsAdminOrReadOnly, is_admin
 
+
+
+def category_queryset_for_user(user):
+    """
+    Return categories visible to the supplied user.
+
+    Administrators can see inactive categories.
+    Everyone else can see active categories only.
+    """
+    queryset = Category.objects.all()
+
+    # Public users see active categories only.
+    if not is_admin(user):
+        queryset = queryset.filter(is_active=True)
+
+    return (
+        queryset.annotate(
+            product_count=Count(
+                "products",
+                filter=Q(products__status="published"),
+                distinct=True,
+            )
+        )
+        .order_by("display_order", "-created_at")
+    )
 # ListCreateAPIView supports two main operations:
 # - GET — retrieve a list of categories.
 # - POST — create a new category.
@@ -14,22 +39,7 @@ class CategoryListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        queryset = Category.objects.all()
-
-        # Public users see active categories only.
-        if not is_admin(self.request.user):
-            queryset = queryset.filter(is_active=True)
-
-        return (
-            queryset.annotate(
-                product_count=Count(
-                    "products",
-                    filter=Q(products__status="published"),
-                    distinct=True,
-                )
-            )
-            .order_by("display_order", "name")
-        )
+        return category_queryset_for_user(self.request.user)
 
     def perform_create(self, serializer):
         # New categories require explicit activation.
@@ -49,19 +59,7 @@ class CategoryDetailView(generics.RetrieveUpdateAPIView):
     ]
 
     def get_queryset(self):
-        queryset = Category.objects.all()
-
-        # Public users cannot retrieve inactive categories.
-        if not is_admin(self.request.user):
-            queryset = queryset.filter(is_active=True)
-
-        return queryset.annotate(
-            product_count=Count(
-                "products",
-                filter=Q(products__status="published"),
-                distinct=True,
-            )
-        )
+        return category_queryset_for_user(self.request.user)
 
     def perform_update(self, serializer):
         instance = self.get_object()

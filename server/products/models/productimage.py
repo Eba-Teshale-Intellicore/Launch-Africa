@@ -1,7 +1,7 @@
 
-from django.core.validators import URLValidator
 from django.db import models
 from django.db.models import Q
+from django.core.validators import URLValidator
 
 from common.models import BaseModel
 from .products import Products
@@ -27,27 +27,19 @@ class ProductImage(BaseModel):
         validators=[https_url_validator],
     )
 
-    alt_text = models.CharField(
-        max_length=250,
-    )
+    alt_text = models.CharField(max_length=250)
 
-    display_order = models.PositiveIntegerField(
-        default=0,
-    )
-
-    is_primary = models.BooleanField(
-        default=False,
-    )
+    display_order = models.PositiveIntegerField(default=0)
+    is_primary = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["display_order", "created_at"]
-
         indexes = [
             models.Index(
                 fields=["product", "display_order"],
+                name="product_image_order_idx",
             ),
         ]
-
         constraints = [
             models.UniqueConstraint(
                 fields=["product", "display_order"],

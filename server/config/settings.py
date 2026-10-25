@@ -173,3 +173,13 @@ EMAIL_BACKEND = (
 )
 FRONTEND_URL = "http://localhost:3000"
 DEFAULT_FROM_EMAIL = "LaunchAfrica <no-reply@example.com>"
+
+
+import cloudinary
+
+cloudinary.config(
+    cloud_name=os.environ["CLOUDINARY_CLOUD_NAME"],
+    api_key=os.environ["CLOUDINARY_API_KEY"],
+    api_secret=os.environ["CLOUDINARY_API_SECRET"],
+    secure=True,
+)

@@ -18,7 +18,7 @@ const categorySchema = z.object({
 
   description: z.string().trim().max(5000, "Description is too long."),
 
-  icon_name: z.enum(["Folder", "File", "House"]),
+  icon_name: z.enum(["folder", "file", "house"]),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
@@ -44,15 +44,13 @@ function getErrorMessage(error: unknown): string {
     }
 
     if (data && typeof data === "object") {
-      const messages = Object.entries(data)
-        .filter(([key]) => key !== "detail" && key !== "non_field_errors")
-        .flatMap(([, value]) =>
-          Array.isArray(value)
-            ? value.filter((item): item is string => typeof item === "string")
-            : typeof value === "string"
-              ? [value]
-              : [],
-        );
+      const messages = Object.entries(data).flatMap(([, value]) =>
+        Array.isArray(value)
+          ? value.filter((item): item is string => typeof item === "string")
+          : typeof value === "string"
+            ? [value]
+            : [],
+      );
 
       if (messages.length > 0) {
         return messages.join(" ");
@@ -84,7 +82,7 @@ export default function CreateCategoryForm() {
     defaultValues: {
       name: "",
       description: "",
-      icon_name: "Folder",
+      icon_name: "folder",
     },
   });
 
@@ -127,17 +125,17 @@ export default function CreateCategoryForm() {
           </label>
 
           <input
-            id="name"
+            id="category-name"
             autoComplete="off"
             placeholder="Artificial Intelligence"
             aria-invalid={Boolean(errors.name)}
-            aria-describedby={errors.name ? "name-error" : undefined}
+            aria-describedby={errors.name ? "category-name-error" : undefined}
             {...register("name")}
             className="input-box rounded-pill w-full px-4 py-3"
           />
 
           {errors.name && (
-            <p id="name-error" className="text-error mt-1 text-sm">
+            <p id="category-name-error" className="text-error mt-1 text-sm">
               {errors.name.message}
             </p>
           )}
@@ -145,19 +143,19 @@ export default function CreateCategoryForm() {
 
         <div>
           <label
-            htmlFor="description"
+            htmlFor="category-description"
             className="text-main mb-2 block text-sm font-semibold"
           >
             Description
           </label>
 
           <textarea
-            id="description"
+            id="category-description"
             rows={4}
             placeholder="Describe the types of projects in this category."
             aria-invalid={Boolean(errors.description)}
             aria-describedby={
-              errors.description ? "description-error" : "description-help"
+              errors.description ? "category-description-error" : undefined
             }
             {...register("description")}
             className="input-box rounded-card w-full resize-none px-4 py-3"
@@ -168,7 +166,10 @@ export default function CreateCategoryForm() {
           </p>
 
           {errors.description && (
-            <p id="description-error" className="text-error mt-1 text-sm">
+            <p
+              id="category-description-error"
+              className="text-error mt-1 text-sm"
+            >
               {errors.description.message}
             </p>
           )}
@@ -176,7 +177,7 @@ export default function CreateCategoryForm() {
 
         <div>
           <label
-            htmlFor="icon_name"
+            htmlFor="category-icon"
             className="text-main mb-2 block text-sm font-semibold"
           >
             Category icon
@@ -184,13 +185,13 @@ export default function CreateCategoryForm() {
 
           <div className="relative">
             <select
-              id="icon_name"
+              id="category-icon"
               {...register("icon_name")}
-              className="input-box rounded-pill w-full appearance-none px-4 py-3 pr-10"
+              className="input-box rounded-pill w-full appearance-none px-4 py-3"
             >
-              <option value="Folder">Folder</option>
-              <option value="File">File</option>
-              <option value="House">House</option>
+              <option value="folder">Folder</option>
+              <option value="file">File</option>
+              <option value="house">House</option>
             </select>
 
             <svg
@@ -233,9 +234,11 @@ export default function CreateCategoryForm() {
         <button
           type="submit"
           disabled={createCategory.isPending}
-          className="btn-main rounded-pill w-full px-4 py-3"
+          className="btn-main rounded-pill w-full px-4 py-3 disabled:opacity-50"
         >
-          {createCategory.isPending ? "Creating category…" : "Create category"}
+          {createCategory.isPending
+            ? "Creating category..."
+            : "Create category"}
         </button>
       </form>
     </section>
