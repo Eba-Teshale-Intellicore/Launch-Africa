@@ -16,8 +16,8 @@ class ProductImage(BaseModel):
         on_delete=models.CASCADE,
         related_name="images",
     )
-
-    cloudinary_public_id = models.CharField(
+    # cloudinary public id
+    public_id = models.CharField(
         max_length=253,
         unique=True,
     )

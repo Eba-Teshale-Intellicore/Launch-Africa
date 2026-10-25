@@ -8,14 +8,14 @@ class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 0
     fields = (
-        "cloudinary_public_id",
+        "public_id",
         "secure_url",
         "alt_text",
         "display_order",
         "is_primary",
     )
     readonly_fields = (
-        "cloudinary_public_id",
+        "public_id",
         "secure_url",
     )
 

@@ -35,7 +35,7 @@ class Category(BaseModel):
     class Meta:
         verbose_name = "Category"
         verbose_name_plural = "Categories"
-        ordering = ["display_order", "name"]
+        ordering = ["display_order", "-created_at"]
         constraints = [
             models.UniqueConstraint(
                 Lower("name"),

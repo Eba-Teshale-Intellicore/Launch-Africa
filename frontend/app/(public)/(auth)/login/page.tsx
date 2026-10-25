@@ -123,7 +123,7 @@ export default function LoginPage() {
         console.error("Could not refresh the authenticated user:", error);
       } finally {
         // Keep this destination if /categories is your intended landing page.
-        router.replace("/categories");
+        router.replace("/products");
         router.refresh();
       }
     },

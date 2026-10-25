@@ -1,45 +1,49 @@
 import Link from "next/link";
 
+import ProductList from "@/components/products/ProductList";
+
 export default function ProductsPage() {
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-12 text-gray-900">
-      <div className="mx-auto max-w-6xl">
-        <Link
-          href="/"
-          className="text-sm font-medium text-amber-700 hover:text-amber-800"
-        >
-          ← Back to home
-        </Link>
+    <main className="bg-page min-h-screen px-4 pb-20 pt-32 sm:px-6 sm:pt-36">
+      <div className="w-page mx-auto">
+        <header className="mx-auto max-w-4xl text-center">
+          <p className="text-soft mb-5 text-xs font-bold uppercase tracking-[0.2em]">
+            Discover African innovation
+          </p>
 
-        <div className="mt-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-amber-600">
-              Discover
-            </p>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight">
-              Explore projects
-            </h1>
-            <p className="mt-3 max-w-2xl text-gray-600">
-              Discover products, ideas, and innovations created by African
-              builders.
-            </p>
-          </div>
+          <h1 className="text-logo text-3xl font-black tracking-tight sm:text-5xl">
+            Discover
+            <span className="text-logo2"> Products</span>
+            <br />
+            Built for Africa
+          </h1>
+
+          <p className="text-soft mx-auto mt-6 max-w-3xl text-md leading-7">
+            Explore innovative products, discover emerging startups, and connect
+            with the builders shaping Africa's future.
+          </p>
 
           <Link
-            href="/dashboard/products/new"
-            className="inline-flex w-fit rounded-lg bg-amber-500 px-5 py-3 font-semibold text-gray-950 hover:bg-amber-400"
+            href="/products/new"
+            className="btn-main rounded-pill mt-8 inline-flex px-6 py-3"
           >
-            Submit a project
+            Launch a product
           </Link>
-        </div>
+        </header>
 
-        <section className="mt-10 rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center">
-          <h2 className="text-xl font-semibold">Your next discovery starts here</h2>
-          <p className="mx-auto mt-3 max-w-lg text-gray-600">
-            Projects will appear here when we connect this page to the
-            LAUNCHAFRICA Django API.
-          </p>
+        <section className="mt-12 sm:mt-16">
+          <div className="divider mb-8">
+            <span className="text-soft text-xs font-semibold tracking-[0.16em]">
+              EXPLORE PRODUCTS
+            </span>
+          </div>
+
+          <ProductList />
         </section>
+
+        <footer className="text-soft mt-16 border-t border-[var(--line)] pt-6 text-center text-xs">
+          Discover. Build. Launch. Grow.
+        </footer>
       </div>
     </main>
   );

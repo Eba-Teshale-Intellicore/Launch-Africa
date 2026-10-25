@@ -10,7 +10,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "product",
-            "cloudinary_public_id",
+            "public_id",
             "secure_url",
             "alt_text",
             "display_order",
@@ -21,7 +21,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
             "product",
-            "cloudinary_public_id",
+            "public_id",
             "secure_url",
             "display_order",
             "is_primary",
