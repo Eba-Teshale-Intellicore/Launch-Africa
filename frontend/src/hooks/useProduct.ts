@@ -7,6 +7,7 @@ import {
   createProduct,
   getProduct,
   updateProduct,
+  uploadProductLogo,
   uploadProductImage,
   deleteProductImage,
   updateProductImage,
@@ -15,6 +16,7 @@ import {
 import type {
   CreateProductInput,
   UpdateProductInput,
+  UploadProductLogoInput,
   UploadProductImageInput,
 } from "@/src/types/product";
 
@@ -67,6 +69,28 @@ export function useUpdateProduct() {
       slug: string;
       input: UpdateProductInput;
     }) => updateProduct(slug, input),
+
+    onSuccess: async (product) => {
+      queryClient.setQueryData(productKeys.detail(product.slug), product);
+
+      await queryClient.invalidateQueries({
+        queryKey: productKeys.lists(),
+      });
+    },
+  });
+}
+
+export function useUploadProductLogo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      slug,
+      input,
+    }: {
+      slug: string;
+      input: UploadProductLogoInput;
+    }) => uploadProductLogo(slug, input),
 
     onSuccess: async (product) => {
       queryClient.setQueryData(productKeys.detail(product.slug), product);

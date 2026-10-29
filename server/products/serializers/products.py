@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from categories.models.categories import Category
 from products.models.products import Products
+from products.serializers.productimage import ProductImageSerializer
 
 
 class CategorySummarySerializer(serializers.ModelSerializer):
@@ -22,6 +23,9 @@ class ProductsSerializer(serializers.ModelSerializer):
 
     owner = serializers.PrimaryKeyRelatedField(read_only=True)
 
+    # Add the related product images to the response.
+    images = ProductImageSerializer(many=True, read_only=True)
+
     class Meta:
         model = Products
         fields = [
@@ -38,12 +42,14 @@ class ProductsSerializer(serializers.ModelSerializer):
             "status",
             "logo_public_id",
             "logo_url",
+            "images",  # Add this field.
             "country",
             "languages",
             "published_at",
             "created_at",
             "updated_at",
         ]
+
         read_only_fields = [
             "id",
             "owner",
@@ -51,10 +57,16 @@ class ProductsSerializer(serializers.ModelSerializer):
             "status",
             "logo_public_id",
             "logo_url",
+            "images",
             "published_at",
             "created_at",
             "updated_at",
         ]
+
+    # Keep your existing validate_title, validate_tagline,
+    # validate_description, URL, country, languages, and
+    # validate methods below this point unchanged.
+
 
     def validate_title(self, value):
         value = value.strip()
@@ -94,14 +106,15 @@ class ProductsSerializer(serializers.ModelSerializer):
             )
         return value
 
+    
     def validate_country(self, value):
         value = value.strip()
-        if value and (
-            len(value) != 2 or not value.isalpha() or not value.isupper()
-        ):
+
+        if len(value) > 30:
             raise serializers.ValidationError(
-                "Use a two-letter uppercase country code, such as ET."
+                "Country name must not exceed 30 characters."
             )
+
         return value
 
     def validate_languages(self, value):

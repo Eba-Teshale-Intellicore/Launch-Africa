@@ -5,7 +5,7 @@ import ProductList from "@/components/products/ProductList";
 export default function ProductsPage() {
   return (
     <main className="bg-page min-h-screen px-4 pb-20 pt-32 sm:px-6 sm:pt-36">
-      <div className="w-page mx-auto">
+      <div className="w-page mx-auto space-y-8">
         <header className="mx-auto max-w-4xl text-center">
           <p className="text-soft mb-5 text-xs font-bold uppercase tracking-[0.2em]">
             Discover African innovation

@@ -6,6 +6,7 @@ import type {
   CreateProductInput,
   UpdateProductInput,
   UploadProductImageInput,
+  UploadProductLogoInput,
 } from "@/src/types/product";
 
 // GET /api/v1/products/
@@ -13,6 +14,7 @@ export async function allProducts(): Promise<Product[]> {
   const res = await api.get<Product[]>("/products/");
   return res.data;
 }
+
 // POST /api/v1/products/
 export async function createProduct(
   input: CreateProductInput,
@@ -20,11 +22,14 @@ export async function createProduct(
   const res = await api.post<Product>("/products/", input);
   return res.data;
 }
+
 // GET /api/v1/products/<slug>/
 export async function getProduct(slug: string): Promise<Product> {
   const res = await api.get<Product>(`/products/${encodeURIComponent(slug)}/`);
+
   return res.data;
 }
+
 // PATCH /api/v1/products/<slug>/
 export async function updateProduct(
   slug: string,
@@ -34,40 +39,47 @@ export async function updateProduct(
     `/products/${encodeURIComponent(slug)}/`,
     input,
   );
+
   return res.data;
 }
 
+// POST /api/v1/products/<slug>/logo/
+export async function uploadProductLogo(
+  slug: string,
+  input: UploadProductLogoInput,
+): Promise<Product> {
+  const formData = new FormData();
+
+  formData.append("logo", input.file);
+
+  const res = await api.post<Product>(
+    `/products/${encodeURIComponent(slug)}/logo/`,
+    formData,
+  );
+
+  return res.data;
+}
+
+// POST /api/v1/products/<slug>/images/
 export async function uploadProductImage(
   slug: string,
   input: UploadProductImageInput,
 ): Promise<ProductImage> {
   const formData = new FormData();
 
-  // "image" must match the field name expected by Django.
+  // Django uploads this file to Cloudinary.
   formData.append("image", input.file);
   formData.append("alt_text", input.alt_text);
-
-  if (input.display_order !== undefined) {
-    formData.append("display_order", String(input.display_order));
-  }
-
-  if (input.is_primary !== undefined) {
-    formData.append("is_primary", String(input.is_primary));
-  }
 
   const res = await api.post<ProductImage>(
     `/products/${encodeURIComponent(slug)}/images/`,
     formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    },
   );
 
   return res.data;
 }
 
+// DELETE /api/v1/products/<slug>/images/<imageId>/
 export async function deleteProductImage(
   slug: string,
   imageId: string,
@@ -77,6 +89,7 @@ export async function deleteProductImage(
   );
 }
 
+// PATCH /api/v1/products/<slug>/images/<imageId>/
 export async function updateProductImage(
   slug: string,
   imageId: string,

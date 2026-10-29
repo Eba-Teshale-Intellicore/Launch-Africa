@@ -18,6 +18,15 @@ const nextConfig: NextConfig = {
   sassOptions: {
     silenceDeprecations: ["import"],
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/ngbqq5zo/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

@@ -15,13 +15,6 @@ from categories.models.categories import Category
 https_url_validator = URLValidator(schemes=["https"])
 
 
-def validate_country_code(value):
-    if value and not re.fullmatch(r"[A-Z]{2}", value):
-        raise ValidationError(
-            "Country must be a two-letter uppercase country code."
-        )
-
-
 def validate_languages(value):
     if not isinstance(value, list):
         raise ValidationError("Languages must be a list.")
@@ -101,9 +94,8 @@ class Products(BaseModel):
     )
 
     country = models.CharField(
-        max_length=2,
+        max_length=30,
         blank=True,
-        validators=[validate_country_code],
     )
 
     languages = models.JSONField(

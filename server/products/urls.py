@@ -9,10 +9,11 @@ from products.views.productimage import (
     ProductImageListCreateView,
     ProductImageDetailView,
 )
-
+from products.views.productlogo import ProductLogoUploadView
 app_name = "products"
 
 urlpatterns = [
+  
     # Individual image operations
     path(
         "images/<uuid:pk>/",
@@ -25,6 +26,11 @@ urlpatterns = [
         "<slug:product_slug>/images/",
         ProductImageListCreateView.as_view(),
         name="product-image-list-create",
+    ),
+    path(
+        "<slug:slug>/logo/",
+        ProductLogoUploadView.as_view(),
+        name="product-logo-upload",
     ),
     path(
         "<slug:slug>/moderate/",

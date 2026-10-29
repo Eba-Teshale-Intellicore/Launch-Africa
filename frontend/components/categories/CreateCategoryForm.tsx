@@ -102,7 +102,7 @@ export default function CreateCategoryForm() {
 
   return (
     <section className="bg-card border-line rounded-card shadow-card w-card mx-auto p-6 sm:p-8">
-      <div className="mb-7 text-center">
+      <header className="mb-7 text-center">
         <div className="mb-4 flex items-center justify-center gap-3">
           <span className="font-logo text-logo text-2xl">LAUNCHAFRICA</span>
         </div>
@@ -113,9 +113,9 @@ export default function CreateCategoryForm() {
           New categories require administrator activation before they appear
           publicly.
         </p>
-      </div>
+      </header>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
         <div>
           <label
             htmlFor="name"

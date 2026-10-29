@@ -57,6 +57,10 @@ export interface CreateProductInput {
 
 export type UpdateProductInput = Partial<CreateProductInput>;
 
+export interface UploadProductLogoInput {
+  file: File;
+}
+
 export interface UploadProductImageInput {
   file: File;
   alt_text: string;
