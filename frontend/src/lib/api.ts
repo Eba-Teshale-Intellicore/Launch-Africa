@@ -34,12 +34,9 @@ interface RefreshResponse {
 }
 
 function isAuthEndpoint(url = ""): boolean {
-  return [
-    "/auth/login/",
-    "/auth/register/",
-    "/auth/token/refresh/",
-    "/auth/logout/",
-  ].some((endpoint) => url.includes(endpoint));
+  return ["/auth/login/", "/auth/register/", "/auth/token/refresh/"].some(
+    (endpoint) => url.includes(endpoint),
+  );
 }
 
 api.interceptors.request.use((config) => {

@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+
 import {
   Home,
   Compass,
@@ -16,12 +19,19 @@ import {
   CircleHelp,
   MessageSquare,
   X,
+  Plus,
+  LogOut,
+  LoaderCircle,
+  ChevronRight,
 } from "lucide-react";
+
+import { logoutUser } from "@/src/lib/auth";
+import { clearAuthSession } from "@/src/lib/auth-session";
+import { authKeys } from "@/src/hooks/useCategory";
 
 type SidebarProps = {
   collapsed: boolean;
   mobileOpen: boolean;
-  onToggleSidebar: () => void;
   onCloseMobileMenu: () => void;
 };
 
@@ -33,7 +43,7 @@ const mainNavigation = [
 ];
 
 const builderNavigation = [
-  { label: "Launch a Product", href: "/products/new", icon: PlusIcon },
+  { label: "Launch a Product", href: "/products/new", icon: Plus },
   { label: "My Projects", href: "/my-projects", icon: FolderKanban },
   { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
   { label: "Community", href: "/community", icon: Users },
@@ -50,20 +60,24 @@ const bottomNavigation = [
   { label: "Help", href: "/help", icon: CircleHelp },
 ];
 
-import { Plus as PlusIcon } from "lucide-react";
-
 export default function Sidebar({
   collapsed,
   mobileOpen,
   onCloseMobileMenu,
 }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Active navigation.
   const isActive = (href: string) =>
     href === "/"
       ? pathname === "/"
       : pathname === href || pathname.startsWith(`${href}/`);
 
+  // Navigation renderer.
   const renderNavigation = (items: typeof mainNavigation, title: string) => (
     <section className="border-b border-line py-3">
       {!collapsed && (
@@ -85,7 +99,7 @@ export default function Sidebar({
               title={collapsed ? item.label : undefined}
               aria-label={collapsed ? item.label : undefined}
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-11 items-center gap-5 rounded-xl px-3 py-2 text-sm transition-colors ${
+              className={`group relative flex min-h-11 items-center gap-5 rounded-xl px-3 py-2 text-sm transition-colors ${
                 collapsed ? "justify-center" : ""
               } ${
                 active
@@ -93,9 +107,24 @@ export default function Sidebar({
                   : "text-secondary hover:bg-hover hover:text-primary"
               }`}
             >
-              <Icon size={21} strokeWidth={active ? 2.5 : 1.8} />
+              {/* Active indicator */}
+              {active && (
+                <span className="absolute bottom-2 left-0 top-2 w-1 rounded-r-full bg-main" />
+              )}
 
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              <Icon
+                size={21}
+                strokeWidth={active ? 2.5 : 1.8}
+                className="shrink-0"
+              />
+
+              {!collapsed && (
+                <>
+                  <span className="flex-1 truncate">{item.label}</span>
+
+                  {active && <ChevronRight size={15} className="text-main" />}
+                </>
+              )}
             </Link>
           );
         })}
@@ -103,21 +132,53 @@ export default function Sidebar({
     </section>
   );
 
+  // Secure local logout.
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      // Remove local authentication credentials.
+      clearAuthSession();
+
+      // Cancel any ongoing current-user request.
+      await queryClient.cancelQueries({
+        queryKey: authKeys.me,
+      });
+
+      // Update authentication state immediately.
+      queryClient.setQueryData(authKeys.me, null);
+
+      // Close mobile navigation.
+      onCloseMobileMenu();
+
+      // Navigate to login.
+      router.replace("/login");
+      router.refresh();
+    }
+  };
+
   return (
     <>
-      {/* Mobile backdrop */}
+      {/* MOBILE BACKDROP */}
       {mobileOpen && (
         <button
           type="button"
           aria-label="Close sidebar"
           onClick={onCloseMobileMenu}
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] md:hidden"
         />
       )}
 
+      {/* SIDEBAR */}
       <aside
         id="main-sidebar"
-        aria-label="Main sidebar"
+        aria-label="Main navigation"
         className={`fixed bottom-0 left-0 top-16 z-50 flex flex-col overflow-y-auto border-r border-line bg-card px-3 transition-all duration-200 md:sticky md:top-16 md:z-30 md:h-[calc(100vh-4rem)] ${
           collapsed ? "w-20" : "w-64"
         } ${
@@ -126,31 +187,57 @@ export default function Sidebar({
             : "-translate-x-full md:translate-x-0"
         }`}
       >
-        {/* Mobile close */}
-        <div className="flex h-12 items-center justify-between md:hidden">
-          <span className="font-bold">Navigation</span>
-          <button
-            type="button"
-            onClick={onCloseMobileMenu}
-            aria-label="Close navigation"
-          >
-            <X size={21} />
-          </button>
-        </div>
-
+        {/* DISCOVER */}
         {renderNavigation(mainNavigation, "Discover")}
 
+        {/* BUILDER STUDIO */}
         {renderNavigation(builderNavigation, "Builder Studio")}
 
+        {/* YOUR LIBRARY */}
         {renderNavigation(personalNavigation, "Your Library")}
 
+        {/* BOTTOM SECTION */}
         <div className="mt-auto">
+          {/* MORE */}
           {renderNavigation(bottomNavigation, "More")}
 
+          {/* ACCOUNT */}
+          <section className="border-b border-line py-3">
+            {!collapsed && (
+              <h2 className="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-muted">
+                Account
+              </h2>
+            )}
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              title={collapsed ? "Logout" : undefined}
+              aria-label="Logout"
+              className={`flex min-h-11 w-full items-center gap-5 rounded-xl px-3 py-2 text-sm text-secondary transition-colors hover:bg-hover hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 ${
+                collapsed ? "justify-center" : ""
+              }`}
+            >
+              {isLoggingOut ? (
+                <LoaderCircle size={21} className="animate-spin" />
+              ) : (
+                <LogOut size={21} />
+              )}
+
+              {!collapsed && (
+                <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+              )}
+            </button>
+          </section>
+
+          {/* FOOTER */}
           {!collapsed && (
             <div className="px-3 py-5 text-xs leading-5 text-muted">
-              <p className="font-bold">LaunchAfrica</p>
+              <p className="font-bold text-primary">LaunchAfrica</p>
+
               <p>Discover. Build. Launch.</p>
+
               <p className="mt-3">© 2026 LaunchAfrica</p>
             </div>
           )}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import { useProduct } from "@/src/hooks/useProduct";
 import { useCurrentUser } from "@/src/hooks/useCategory";
@@ -45,6 +45,7 @@ export default function ProductDetailPage() {
   );
 
   const { showToast } = useToast();
+  const router = useRouter();
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
 
@@ -56,7 +57,7 @@ export default function ProductDetailPage() {
     refetch,
   } = useProduct(slug);
 
-  const { data: user, isPending: checkingUser } = useCurrentUser();
+  const { data: user, isLoading: checkingUser } = useCurrentUser();
 
   // Calculate images safely, including while product data is loading.
   const images = [...(product?.images ?? [])].sort(
@@ -142,6 +143,23 @@ export default function ProductDetailPage() {
   const isOwner = Boolean(user) && String(user?.id) === String(product.owner);
 
   const canManage = !checkingUser && (isOwner || isAdmin);
+
+  const handleExternalLink = (url: string) => {
+    if (checkingUser) {
+      showToast("Please wait while we verify your account.", "info");
+      return;
+    }
+
+    if (!user) {
+      showToast(
+        "Login required! Please sign in to visit this website or view the demo.",
+        "error",
+      );
+      return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   const categoryName =
     typeof product.category === "object" && product.category
@@ -271,14 +289,13 @@ export default function ProductDetailPage() {
               {(product.website_url || product.demo_url) && (
                 <div className="mt-5 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap">
                   {product.website_url && (
-                    <a
-                      href={product.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => handleExternalLink(product.website_url!)}
                       className="btn-main rounded-pill inline-flex w-full items-center justify-center px-4 py-3 text-sm sm:w-auto sm:px-5"
                     >
                       Visit website ↗
-                    </a>
+                    </button>
                   )}
 
                   <button
@@ -346,14 +363,13 @@ export default function ProductDetailPage() {
             </h2>
 
             {product.demo_url ? (
-              <a
-                href={product.demo_url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => handleExternalLink(product.demo_url!)}
                 className="btn-soft rounded-pill inline-flex w-full items-center justify-center px-4 py-3 text-sm sm:w-auto sm:px-5"
               >
                 View demo ↗
-              </a>
+              </button>
             ) : (
               images.length > 0 && (
                 <span className="text-soft shrink-0 text-xs sm:text-sm">

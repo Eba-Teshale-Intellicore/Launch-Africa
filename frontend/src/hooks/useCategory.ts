@@ -39,14 +39,14 @@ export const authKeys = {
 
 // Fetch the authenticated user from Django.
 export function useCurrentUser() {
-  return useQuery<AuthUser, Error>({
+  return useQuery<AuthUser | null, Error>({
     queryKey: authKeys.me,
 
     queryFn: async () => {
       const accessToken = getAccessToken();
 
       if (!accessToken) {
-        throw new Error("Please sign in.");
+        return null;
       }
 
       return getCurrentUser();
@@ -64,7 +64,7 @@ export function useCurrentUser() {
 // Call after login or when the authenticated user changes.
 export async function refreshCurrentUser(
   queryClient: QueryClient,
-  user?: AuthUser,
+  user?: AuthUser | null,
 ) {
   if (user) {
     queryClient.setQueryData(authKeys.me, user);
@@ -73,7 +73,7 @@ export async function refreshCurrentUser(
       queryKey: authKeys.me,
     });
   } else {
-    queryClient.setQueryData(authKeys.me, undefined);
+    queryClient.setQueryData(authKeys.me, null);
   }
 
   await queryClient.invalidateQueries({

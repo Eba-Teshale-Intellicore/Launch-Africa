@@ -50,7 +50,7 @@ export interface CreateProductInput {
   description: string;
   website_url: string;
   demo_url?: string;
-  category_id: string;
+  category_ids: string[];
   country?: string;
   languages?: string[];
 }

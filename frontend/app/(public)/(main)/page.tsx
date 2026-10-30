@@ -1,44 +1,58 @@
 import Link from "next/link";
-
+import ProductList from "@/components/products/ProductList";
 export default function MainPage() {
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-16 text-gray-900">
-      <div className="mx-auto max-w-6xl">
-        <p className="text-sm font-semibold uppercase tracking-widest text-amber-600">
-          LAUNCHAFRICA
-        </p>
+    <main className="bg-page min-h-screen px-4 pb-20 pt-32 sm:px-6 sm:pt-36">
+      <div className="w-page mx-auto space-y-8">
+        <header className="mx-auto max-w-4xl text-center">
+          <p className="text-soft mb-5 text-xs font-bold uppercase tracking-[0.2em]">
+            LAUNCHAFRICA
+          </p>
 
-        <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight sm:text-6xl">
-          Discover African projects. Build what comes next.
-        </h1>
+          <h1 className="text-logo text-3xl font-black tracking-tight sm:text-6xl">
+            Discover <span className="text-logo2"> African </span>projects.
+            Build
+            <br />
+            what comes next.
+          </h1>
 
-        <p className="mt-6 max-w-2xl text-lg text-gray-600">
-          Explore innovative projects, discover African builders, and share what
-          you are creating with the community.
-        </p>
-
-        <div className="mt-8 flex flex-wrap gap-4">
+          <p className="text-soft mx-auto mt-6 max-w-3xl text-md leading-7">
+            Explore innovative projects, discover African builders, and share
+            what you are creating with the community.
+          </p>
           <Link
             href="/products/"
-            className="rounded-lg bg-amber-500 px-6 py-3 font-semibold text-gray-950 hover:bg-amber-400"
+            className="btn-main rounded-pill mt-8 inline-flex px-6 py-3 mx-4"
           >
             Explore projects
           </Link>
 
-          <a
+          <Link
             href="/register"
-            className="rounded-lg border border-gray-300 px-6 py-3 font-semibold hover:bg-white"
+            className="btn-main rounded-pill mt-8 inline-flex px-6 py-3 mx-4"
           >
             Join the community
-          </a>
-        </div>
+          </Link>
+        </header>
 
-        <section className="mt-16 border-t border-gray-200 pt-8">
+        <section className="mt-12 sm:mt-16">
+          <div className="divider mb-8">
+            <span className="text-soft text-xs font-semibold tracking-[0.16em]">
+              SOME
+            </span>
+          </div>
+
           <h2 className="text-2xl font-bold">Made by African builders</h2>
-          <p className="mt-3 text-gray-600">
+          <p className="mt-3 text-gray-600 mb-12">
             Project discovery and launches are coming together here.
           </p>
+
+          <ProductList />
         </section>
+
+        <footer className="text-soft mt-16 border-t border-[var(--line)] pt-6 text-center text-xs">
+          Discover. Build. Launch. Grow.
+        </footer>
       </div>
     </main>
   );

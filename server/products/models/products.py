@@ -72,10 +72,10 @@ class Products(BaseModel):
         validators=[https_url_validator],
     )
 
-    category = models.ForeignKey(
+    categories = models.ManyToManyField(
         Category,
-        on_delete=models.PROTECT,
         related_name="products",
+        blank=True,
     )
 
     status = models.CharField(
@@ -114,8 +114,8 @@ class Products(BaseModel):
         ordering = ["-published_at", "-created_at"]
         indexes = [
             models.Index(
-                fields=["category", "status", "-published_at"],
-                name="product_cat_status_pub_idx",
+                fields=["status", "-published_at"],
+                name="product_status_pub_idx",
             ),
             models.Index(
                 fields=["owner", "status"],

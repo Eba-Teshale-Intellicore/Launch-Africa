@@ -1,8 +1,17 @@
+"use client";
+
 import Link from "next/link";
 
 import ProductList from "@/components/products/ProductList";
+import { useCurrentUser } from "@/src/hooks/useCategory";
 
 export default function ProductsPage() {
+  const { data: user, isLoading } = useCurrentUser();
+
+  const createProductHref = user
+    ? "/products/new"
+    : "/login?next=%2Fproducts%2Fnew";
+
   return (
     <main className="bg-page min-h-screen px-4 pb-20 pt-32 sm:px-6 sm:pt-36">
       <div className="w-page mx-auto space-y-8">
@@ -11,7 +20,7 @@ export default function ProductsPage() {
             Discover African innovation
           </p>
 
-          <h1 className="text-logo text-3xl font-black tracking-tight sm:text-5xl">
+          <h1 className="text-logo text-3xl font-black tracking-tight sm:text-6xl">
             Discover
             <span className="text-logo2"> Products</span>
             <br />
@@ -24,10 +33,17 @@ export default function ProductsPage() {
           </p>
 
           <Link
-            href="/products/new"
-            className="btn-main rounded-pill mt-8 inline-flex px-6 py-3"
+            href={createProductHref}
+            aria-disabled={isLoading}
+            className={`btn-main rounded-pill mt-8 inline-flex px-6 py-3 ${
+              isLoading ? "pointer-events-none opacity-60" : ""
+            }`}
           >
-            Launch a product
+            {isLoading
+              ? "Checking account..."
+              : user
+                ? "Launch a product"
+                : "Login to launch a product"}
           </Link>
         </header>
 
