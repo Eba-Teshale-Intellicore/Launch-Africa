@@ -2,20 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCurrentUser } from "@/src/hooks/useCategory";
+import {
+  Home,
+  Compass,
+  Rocket,
+  FolderKanban,
+  Layers,
+  Users,
+  Trophy,
+  Bookmark,
+  History,
+  Settings,
+  CircleHelp,
+  MessageSquare,
+  X,
+} from "lucide-react";
 
 type SidebarProps = {
   collapsed: boolean;
   mobileOpen: boolean;
+  onToggleSidebar: () => void;
   onCloseMobileMenu: () => void;
 };
 
-const navigation = [
-  { label: "Home", href: "/", icon: "⌂" },
-  { label: "Products", href: "/products", icon: "▦" },
-  { label: "Categories", href: "/categories", icon: "◫" },
-  { label: "Launch a Product", href: "/products/new", icon: "+" },
+const mainNavigation = [
+  { label: "Home", href: "/", icon: Home },
+  { label: "Explore", href: "/explore", icon: Compass },
+  { label: "Products", href: "/products", icon: Rocket },
+  { label: "Categories", href: "/categories", icon: Layers },
 ];
+
+const builderNavigation = [
+  { label: "Launch a Product", href: "/products/new", icon: PlusIcon },
+  { label: "My Projects", href: "/my-projects", icon: FolderKanban },
+  { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
+  { label: "Community", href: "/community", icon: Users },
+];
+
+const personalNavigation = [
+  { label: "Saved", href: "/saved", icon: Bookmark },
+  { label: "History", href: "/history", icon: History },
+  { label: "Discussions", href: "/discussions", icon: MessageSquare },
+];
+
+const bottomNavigation = [
+  { label: "Settings", href: "/settings", icon: Settings },
+  { label: "Help", href: "/help", icon: CircleHelp },
+];
+
+import { Plus as PlusIcon } from "lucide-react";
 
 export default function Sidebar({
   collapsed,
@@ -23,16 +58,50 @@ export default function Sidebar({
   onCloseMobileMenu,
 }: SidebarProps) {
   const pathname = usePathname();
-  const { data: user, isPending: checkingUser } = useCurrentUser();
 
   const isActive = (href: string) =>
     href === "/"
       ? pathname === "/"
       : pathname === href || pathname.startsWith(`${href}/`);
 
-  const initials = (user?.username || user?.email || "U")
-    .charAt(0)
-    .toUpperCase();
+  const renderNavigation = (items: typeof mainNavigation, title: string) => (
+    <section className="border-b border-line py-3">
+      {!collapsed && (
+        <h2 className="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-muted">
+          {title}
+        </h2>
+      )}
+
+      <div className="space-y-1">
+        {items.map((item) => {
+          const active = isActive(item.href);
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onCloseMobileMenu}
+              title={collapsed ? item.label : undefined}
+              aria-label={collapsed ? item.label : undefined}
+              aria-current={active ? "page" : undefined}
+              className={`flex min-h-11 items-center gap-5 rounded-xl px-3 py-2 text-sm transition-colors ${
+                collapsed ? "justify-center" : ""
+              } ${
+                active
+                  ? "bg-hover font-semibold text-primary"
+                  : "text-secondary hover:bg-hover hover:text-primary"
+              }`}
+            >
+              <Icon size={21} strokeWidth={active ? 2.5 : 1.8} />
+
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
 
   return (
     <>
@@ -40,119 +109,51 @@ export default function Sidebar({
       {mobileOpen && (
         <button
           type="button"
-          aria-label="Close navigation menu"
+          aria-label="Close sidebar"
           onClick={onCloseMobileMenu}
-          className="fixed inset-x-0 bottom-0 top-16 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
         />
       )}
 
       <aside
         id="main-sidebar"
-        aria-label="Application sidebar"
-        aria-hidden={!mobileOpen && undefined}
-        className={[
-          "fixed bottom-0 left-0 top-16 z-40 flex flex-col",
-          "w-72 border-r border-line bg-card p-3 shadow-xl",
-          "transition-[width,transform] duration-200",
-          "md:sticky md:top-20 md:z-30",
-          "md:h-[calc(100vh-5rem)] md:shrink-0 md:shadow-none",
-          "md:translate-x-0",
-          collapsed ? "md:w-20" : "md:w-64",
-          mobileOpen ? "translate-x-0" : "-translate-x-full",
-          mobileOpen ? "flex" : "hidden md:flex",
-        ].join(" ")}
+        aria-label="Main sidebar"
+        className={`fixed bottom-0 left-0 top-16 z-50 flex flex-col overflow-y-auto border-r border-line bg-card px-3 transition-all duration-200 md:sticky md:top-16 md:z-30 md:h-[calc(100vh-4rem)] ${
+          collapsed ? "w-20" : "w-64"
+        } ${
+          mobileOpen
+            ? "!w-72 translate-x-0"
+            : "-translate-x-full md:translate-x-0"
+        }`}
       >
-        {/* Navigation */}
-        <nav
-          aria-label="Main navigation"
-          className="flex flex-1 flex-col gap-2 overflow-y-auto"
-        >
-          {navigation.map((item) => {
-            const active = isActive(item.href);
+        {/* Mobile close */}
+        <div className="flex h-12 items-center justify-between md:hidden">
+          <span className="font-bold">Navigation</span>
+          <button
+            type="button"
+            onClick={onCloseMobileMenu}
+            aria-label="Close navigation"
+          >
+            <X size={21} />
+          </button>
+        </div>
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                title={collapsed ? item.label : undefined}
-                aria-label={collapsed ? item.label : undefined}
-                aria-current={active ? "page" : undefined}
-                onClick={onCloseMobileMenu}
-                className={[
-                  "flex min-h-11 items-center gap-3 rounded-xl px-3 py-3",
-                  "transition-colors",
-                  collapsed ? "md:justify-center" : "",
-                  active ? "btn-main font-semibold" : "btn-soft",
-                ].join(" ")}
-              >
-                <span
-                  aria-hidden="true"
-                  className="inline-flex w-6 shrink-0 justify-center text-lg"
-                >
-                  {item.icon}
-                </span>
+        {renderNavigation(mainNavigation, "Discover")}
 
-                <span
-                  className={`truncate text-sm ${collapsed ? "md:hidden" : ""}`}
-                >
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
+        {renderNavigation(builderNavigation, "Builder Studio")}
 
-        {/* Account */}
-        <div className="mt-4 shrink-0 border-t border-line pt-4">
-          {!checkingUser &&
-            (user ? (
-              <Link
-                href="/profile"
-                title={
-                  collapsed
-                    ? user.username || user.email || "Profile"
-                    : undefined
-                }
-                aria-label={
-                  collapsed
-                    ? user.username || user.email || "Open profile"
-                    : undefined
-                }
-                onClick={onCloseMobileMenu}
-                className={[
-                  "btn-soft flex min-h-12 items-center gap-3 rounded-xl p-2",
-                  collapsed ? "md:justify-center" : "",
-                ].join(" ")}
-              >
-                <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-line font-semibold">
-                  {initials}
-                </span>
+        {renderNavigation(personalNavigation, "Your Library")}
 
-                <span
-                  className={`min-w-0 flex-1 truncate text-sm ${
-                    collapsed ? "md:hidden" : ""
-                  }`}
-                >
-                  {user.username || user.email}
-                </span>
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                title={collapsed ? "Login" : undefined}
-                onClick={onCloseMobileMenu}
-                className={[
-                  "btn-main flex min-h-11 items-center gap-3 rounded-pill px-3 py-2",
-                  collapsed ? "md:justify-center" : "",
-                ].join(" ")}
-              >
-                <span aria-hidden="true">↪</span>
+        <div className="mt-auto">
+          {renderNavigation(bottomNavigation, "More")}
 
-                <span className={`text-sm ${collapsed ? "md:hidden" : ""}`}>
-                  Login
-                </span>
-              </Link>
-            ))}
+          {!collapsed && (
+            <div className="px-3 py-5 text-xs leading-5 text-muted">
+              <p className="font-bold">LaunchAfrica</p>
+              <p>Discover. Build. Launch.</p>
+              <p className="mt-3">© 2026 LaunchAfrica</p>
+            </div>
+          )}
         </div>
       </aside>
     </>

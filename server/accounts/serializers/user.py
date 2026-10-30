@@ -1,8 +1,14 @@
+
 import re
+
 from rest_framework import serializers
+
 from accounts.models.user import User
 
+
 class UserSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -15,6 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "is_verified",
             "auth_provider",
+            "avatar_url",
             "date_joined",
             "created_at",
             "updated_at",
@@ -29,10 +36,19 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "is_verified",
             "auth_provider",
+            "avatar_url",
             "date_joined",
             "created_at",
             "updated_at",
         ]
+
+    def get_avatar_url(self, obj):
+        profile = getattr(obj, "profile", None)
+
+        if not profile:
+            return None
+
+        return profile.avatar_url or None
 
     def validate_username(self, value):
         value = value.strip().lower()

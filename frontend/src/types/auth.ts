@@ -6,6 +6,10 @@ export interface AuthUser {
   is_staff?: boolean;
   is_superuser?: boolean;
   is_active?: boolean;
+
+  // Profile information
+  display_name?: string | null;
+  avatar_url?: string | null;
 }
 
 export interface AuthTokens {

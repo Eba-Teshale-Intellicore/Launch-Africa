@@ -3,8 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import Providers from "@/src/providers/queryProviders";
 import { ToastProvider } from "@/components/toast/ToastProvider";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Layout from "@/components/layout/Layout";
 
 import "./globals.scss";
 
@@ -43,12 +42,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen">
+      <body className="min-h-screen bg-background text-primary">
         <ToastProvider>
           <Providers>
-            <Header />
-            <main>{children}</main>
-            <Sidebar />
+            <Layout>{children}</Layout>
           </Providers>
         </ToastProvider>
       </body>

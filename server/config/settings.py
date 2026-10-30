@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'categories',
     'products',
     'communities',
+    'discovery',
 ]
 
 AUTH_USER_MODEL = "accounts.User"
