@@ -244,13 +244,18 @@ export default function ProductDetailPage() {
           <div className="flex min-w-0 flex-row gap-5 sm:items-start sm:gap-6">
             {/* Product logo */}
             <div className="bg-input border-line flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-card border sm:size-24 lg:size-28">
-              <Image
-                src={product.logo_url}
-                alt={`${product.title} logo`}
-                width={112}
-                height={112}
-                className="size-full rounded-card object-contain p-2"
-              />
+              {product.logo_url ? (
+                <Image
+                  src={product.logo_url}
+                  alt={`${product.title} logo`}
+                  width={112}
+                  height={112}
+                  className="size-full rounded-card object-contain p-2"
+                  unoptimized
+                />
+              ) : (
+                <span className="text-soft text-xs">No logo</span>
+              )}
             </div>
 
             {/* Product information */}
@@ -403,6 +408,7 @@ export default function ProductDetailPage() {
                         }
                         width={800}
                         height={500}
+                        unoptimized
                         className="size-full min-h-0 object-cover"
                         sizes="(max-width: 639px) 78vw, (max-width: 767px) 288px, (max-width: 1023px) 320px, (max-width: 1279px) 448px, 512px"
                       />
@@ -483,6 +489,7 @@ export default function ProductDetailPage() {
               }
               fill
               priority
+              unoptimized
               sizes="100vw"
               className="object-contain"
             />

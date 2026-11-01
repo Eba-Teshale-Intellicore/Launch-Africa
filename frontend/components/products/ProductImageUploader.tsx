@@ -182,11 +182,17 @@ export default function ProductImageUploader({ slug, canManage }: Props) {
               className="border-line bg-input rounded-card overflow-hidden border"
             >
               <div className="aspect-[4/3]">
-                <img
-                  src={image.secure_url}
-                  alt={image.alt_text}
-                  className="size-full object-cover"
-                />
+                {image.secure_url ? (
+                  <img
+                    src={image.secure_url}
+                    alt={image.alt_text || "Product image"}
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <div className="flex size-full items-center justify-center text-sm text-soft">
+                    Image unavailable
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3 p-3">

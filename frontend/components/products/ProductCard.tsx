@@ -54,14 +54,21 @@ export default function ProductCard({ product, isOwnerView = false }: Props) {
       >
         <div className="flex items-start gap-4">
           <div>
-            <div className="bg-page text-soft flex size-16 shrink-0 items-center justify-center rounded-card transition-colors group-hover:text-logo2 mt-1">
-              <Image
-                src={product.logo_url}
-                alt={`${product.title} logo`}
-                width={64}
-                height={64}
-                className="bg-input size-16 shrink-0 rounded-2xl object-contain transition-colors"
-              />
+            <div className="bg-page text-soft mt-1 flex size-16 shrink-0 items-center justify-center rounded-card transition-colors group-hover:text-logo2">
+              {product.logo_url ? (
+                <Image
+                  src={product.logo_url}
+                  alt={`${product.title} logo`}
+                  width={64}
+                  height={64}
+                  unoptimized
+                  className="bg-input size-16 shrink-0 rounded-2xl object-contain transition-colors"
+                />
+              ) : (
+                <span className="text-xs font-semibold">
+                  {product.title.slice(0, 2).toUpperCase()}
+                </span>
+              )}
             </div>
           </div>
           <div className="min-w-0 flex-1 pt-1">

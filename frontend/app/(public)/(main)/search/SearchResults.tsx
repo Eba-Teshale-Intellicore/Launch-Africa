@@ -138,6 +138,7 @@ export default function SearchResults() {
                               alt={product.title}
                               fill
                               sizes="56px"
+                              unoptimized
                               className="object-cover"
                             />
                           ) : (

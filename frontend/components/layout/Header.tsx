@@ -45,8 +45,12 @@ export default function Header({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const { data: user, isLoading: checkingUser } = useCurrentUser();
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Debounce search input.
   useEffect(() => {
@@ -372,13 +376,16 @@ export default function Header({
                                   {product.logo_url ? (
                                     <Image
                                       src={product.logo_url}
-                                      alt=""
-                                      width={40}
-                                      height={40}
-                                      className="size-full object-cover"
+                                      alt={`${product.title} logo`}
+                                      width={112}
+                                      height={112}
+                                      unoptimized
+                                      className="size-full object-contain p-2"
                                     />
                                   ) : (
-                                    <Rocket size={18} className="text-muted" />
+                                    <span className="text-soft text-xs">
+                                      No logo
+                                    </span>
                                   )}
                                 </div>
 
@@ -528,7 +535,7 @@ export default function Header({
           <button
             type="button"
             onClick={handleCreateProduct}
-            disabled={checkingUser}
+            disabled={!mounted || checkingUser}
             title="Create a product"
             className="hidden h-10 items-center gap-2 rounded-full bg-hover px-3 text-sm font-semibold transition-colors hover:bg-hover/70 disabled:cursor-wait disabled:opacity-50 lg:inline-flex"
           >
@@ -547,7 +554,7 @@ export default function Header({
           </button>
 
           {/* AUTHENTICATION */}
-          {checkingUser ? (
+          {!mounted || checkingUser ? (
             <div
               aria-label="Loading user profile"
               className="size-9 shrink-0 animate-pulse rounded-full bg-hover sm:size-10"
