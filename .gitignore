@@ -1,28 +1,159 @@
-# Environment secrets
+# ==========================================
+# LAUNCHAFRICA - ROOT GITIGNORE
+# Next.js + Django + PostgreSQL + Cloudinary
+# ==========================================
+
+# ------------------------------------------
+# ENVIRONMENT VARIABLES & SECRETS
+# ------------------------------------------
 .env
 .env.*
 !.env.example
+!.env.*.example
 
-# Python
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# ------------------------------------------
+# PYTHON / DJANGO
+# ------------------------------------------
 __pycache__/
 *.py[cod]
-*.sqlite3
+*$py.class
+
+.Python
+*.so
+
+# Virtual environments
 .venv/
 venv/
+env/
+ENV/
+
+# Python packaging
+build/
+dist/
+eggs/
+*.egg-info/
+.eggs/
+
+# Testing and coverage
 .pytest_cache/
 .coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Type checking and linting
+.mypy_cache/
+.pytype/
+.ruff_cache/
 
 # Django
-staticfiles/
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
 media/
+staticfiles/
+static_root/
+
+# ------------------------------------------
+# NODE.JS / NEXT.JS
+# ------------------------------------------
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
 
 # Next.js
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/coverage/
+.next/
+out/
+.vercel/
 
-# Local environment files
+# Build outputs
+dist/
+build/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ------------------------------------------
+# DATABASE / BACKUPS
+# ------------------------------------------
+*.sqlite3
+*.db
+*.dump
+*.sql.gz
+*.backup
+
+# ------------------------------------------
+# CLOUDINARY / MEDIA
+# ------------------------------------------
+cloudinary/
+uploads/
+*.upload
+
+# ------------------------------------------
+# IDE / EDITOR
+# ------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
+*.swp
+*.swo
+*~
+
+# ------------------------------------------
+# OPERATING SYSTEM
+# ------------------------------------------
 .DS_Store
-.vscode/
-requirements.txt
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# ------------------------------------------
+# TEMPORARY FILES
+# ------------------------------------------
+*.tmp
+*.temp
+*.bak
+*.old
+.cache/
+.temp/
+
+# ------------------------------------------
+# TEST / AUTOMATION
+# ------------------------------------------
+playwright-report/
+test-results/
+coverage/
+.nyc_output/
+
+# ------------------------------------------
+# DEPLOYMENT / LOCAL TOOLING
+# ------------------------------------------
+.render/
+.vercel/
+.turbo/
+.parcel-cache/
+
+# ------------------------------------------
+# LOCAL ENVIRONMENT CONFIGURATION
+# ------------------------------------------
+.python-version.local
