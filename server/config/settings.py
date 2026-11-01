@@ -62,13 +62,35 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = "accounts.User"
+# FRONTEND_URL = os.environ.get(
+#     "FRONTEND_URL",
+#     "http://localhost:3000",
+# )
+
+# CORS_ALLOWED_ORIGINS = [
+#     FRONTEND_URL,
+# ]
 FRONTEND_URL = os.environ.get(
     "FRONTEND_URL",
     "http://localhost:3000",
-)
+).rstrip("/")
 
 CORS_ALLOWED_ORIGINS = [
-    FRONTEND_URL,
+    origin.strip().rstrip("/")
+    for origin in os.environ.get(
+        "CORS_ALLOWED_ORIGINS",
+        FRONTEND_URL,
+    ).split(",")
+    if origin.strip()
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip().rstrip("/")
+    for origin in os.environ.get(
+        "CSRF_TRUSTED_ORIGINS",
+        FRONTEND_URL,
+    ).split(",")
+    if origin.strip()
 ]
 
 REST_FRAMEWORK = {
@@ -85,6 +107,10 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+
+    # Production static file serving
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -179,7 +205,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # Email
@@ -193,7 +220,6 @@ STATIC_URL = 'static/'
 EMAIL_BACKEND = (
     "django.core.mail.backends.console.EmailBackend"
 )
-FRONTEND_URL = "http://localhost:3000"
 DEFAULT_FROM_EMAIL = "LaunchAfrica <no-reply@example.com>"
 
 
@@ -205,3 +231,22 @@ cloudinary.config(
     api_secret=os.environ["CLOUDINARY_API_SECRET"],
     secure=True,
 )
+# ==========================================
+# PRODUCTION SECURITY
+# ==========================================
+
+SECURE_PROXY_SSL_HEADER = (
+    "HTTP_X_FORWARDED_PROTO",
+    "https",
+)
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+
+    SESSION_COOKIE_SECURE = True
+
+    CSRF_COOKIE_SECURE = True
+
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+    X_FRAME_OPTIONS = "DENY"
