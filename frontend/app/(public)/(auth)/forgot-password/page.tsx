@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,8 +19,6 @@ const forgotPasswordSchema = z.object({
 });
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
-
-type Theme = "dark" | "light";
 
 function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError<ApiErrorBody>(error)) {
@@ -44,27 +41,6 @@ function getErrorMessage(error: unknown): string {
 }
 
 export default function ForgotPasswordPage() {
-  const [theme, setTheme] = useState<Theme>("dark");
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem("la-theme");
-
-    if (saved === "light" || saved === "dark") {
-      document.documentElement.setAttribute("data-theme", saved);
-
-      const frame = window.requestAnimationFrame(() => {
-        setTheme(saved);
-      });
-
-      return () => window.cancelAnimationFrame(frame);
-    }
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    window.localStorage.setItem("la-theme", theme);
-  }, [theme]);
-
   const {
     register,
     handleSubmit,
@@ -88,63 +64,15 @@ export default function ForgotPasswordPage() {
     });
   };
 
-  const toggleTheme = () => {
-    setTheme((current) => (current === "dark" ? "light" : "dark"));
-  };
-
   return (
     <main className="bg-page flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg sm:mx-auto">
         <section className="bg-card border-line rounded-card shadow-card border p-6 sm:p-8">
-          {/* Brand and theme toggle */}
           <header className="mb-7 text-center">
-            <div className="mb-5 flex items-center justify-center gap-3">
+            <div className="mb-5 flex items-center justify-center">
               <Link href="/" className="font-logo text-logo text-2xl">
                 LAUNCHAFRICA
               </Link>
-
-              <button
-                type="button"
-                onClick={toggleTheme}
-                aria-label={`Switch to ${
-                  theme === "dark" ? "light" : "dark"
-                } theme`}
-                aria-pressed={theme === "light"}
-                className="btn-soft rounded-pill inline-flex size-9 items-center justify-center"
-              >
-                {theme === "dark" ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
-                  </svg>
-                )}
-              </button>
             </div>
 
             {/* Mail icon */}

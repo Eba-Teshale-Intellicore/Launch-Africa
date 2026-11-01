@@ -18,8 +18,12 @@ class ProductListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = Products.objects.select_related(
-            "owner", "category"
+            "owner"
+        ).prefetch_related(
+            "categories",
+            "images",
         )
+
         user = self.request.user
 
         if not (user.is_authenticated and is_admin(user)):
@@ -44,8 +48,12 @@ class ProductDetailView(generics.RetrieveUpdateAPIView):
 
     def get_queryset(self):
         queryset = Products.objects.select_related(
-            "owner", "category"
+            "owner"
+        ).prefetch_related(
+            "categories",
+            "images",
         )
+
         user = self.request.user
 
         if user.is_authenticated and is_admin(user):
@@ -57,7 +65,9 @@ class ProductDetailView(generics.RetrieveUpdateAPIView):
                 | Q(owner=user)
             )
 
-        return queryset.filter(status=Products.Status.PUBLISHED)
+        return queryset.filter(
+            status=Products.Status.PUBLISHED
+        )
 
     def perform_update(self, serializer):
         product = serializer.instance
@@ -93,32 +103,39 @@ class ProductModerationSerializer(serializers.ModelSerializer):
 
     def validate_status(self, value):
         product = self.instance
-        allowed = self.ALLOWED_TRANSITIONS.get(product.status, set())
+        allowed = self.ALLOWED_TRANSITIONS.get(
+            product.status,
+            set(),
+        )
 
         if value not in allowed:
             raise serializers.ValidationError(
                 f"Cannot transition from '{product.status}' to '{value}'."
             )
 
-        if (
-            value == Products.Status.PUBLISHED
-            and not product.category.is_active
-        ):
-            raise serializers.ValidationError(
-                "A product cannot be published under an inactive category."
-            )
-
         if value == Products.Status.PUBLISHED:
+            if not product.categories.exists():
+                raise serializers.ValidationError(
+                    "A product must have at least one category before publishing."
+                )
+
+            if product.categories.filter(is_active=False).exists():
+                raise serializers.ValidationError(
+                    "A product cannot be published with an inactive category."
+                )
+
             required_fields = [
                 "title",
                 "tagline",
                 "description",
                 "website_url",
             ]
+
             missing = [
                 field for field in required_fields
                 if not getattr(product, field)
             ]
+
             if missing:
                 raise serializers.ValidationError(
                     "Complete all required product fields before publishing."
@@ -133,7 +150,11 @@ class ProductModerationSerializer(serializers.ModelSerializer):
 
 
 class ProductModerationView(generics.UpdateAPIView):
-    queryset = Products.objects.select_related("category")
+    queryset = Products.objects.select_related(
+        "owner"
+    ).prefetch_related(
+        "categories",
+    )
     serializer_class = ProductModerationSerializer
     permission_classes = [IsAdminUserRole]
     lookup_field = "slug"

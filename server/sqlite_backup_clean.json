@@ -1,0 +1,363 @@
+[
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$RpdxGV4M2GBcL04qchBaPv$/bdgxCkCrB3ivVQId+Om/YXP6rWpad/+UYFy1y+ncMI=",
+    "last_login": "2026-10-30T08:51:05.906Z",
+    "is_superuser": true,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-30T08:48:32.488Z",
+    "created_at": "2026-10-30T08:48:32.713Z",
+    "updated_at": "2026-10-30T08:48:32.713Z",
+    "username": "eba teshale",
+    "email": "eba@gmail.com",
+    "auth_provider": "email",
+    "role": "admin",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$y4XJa6qbEFHJ3sRCdyZVa6$tYDNTSelrxGUJtLt9/kxT17sGvO5Fs21Y2eTmRxFKz4=",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-10-30T10:50:07.327Z",
+    "created_at": "2026-10-30T10:50:07.552Z",
+    "updated_at": "2026-10-30T10:50:07.552Z",
+    "username": "musa",
+    "email": "musa@gmail.com",
+    "auth_provider": "email",
+    "role": "builder",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.profile",
+  "pk": "ca9f4749-3b1d-485d-80c2-01a3fe642eb4",
+  "fields": {
+    "created_at": "2026-10-30T10:50:07.554Z",
+    "updated_at": "2026-10-30T10:50:07.554Z",
+    "user": [
+      "musa@gmail.com"
+    ],
+    "display_name": "",
+    "bio": "",
+    "avatar_public_id": "",
+    "avatar_url": "",
+    "country": "",
+    "city": "",
+    "website_url": "",
+    "github_url": "",
+    "linkedin_url": "",
+    "x_url": "",
+    "youtube_url": ""
+  }
+},
+{
+  "model": "categories.category",
+  "pk": "13b757db-151b-4a53-936f-cd31581abd10",
+  "fields": {
+    "created_at": "2026-10-26T13:55:14.253Z",
+    "updated_at": "2026-10-30T09:34:31.822Z",
+    "name": "E-Commerce",
+    "slug": "e-commerce",
+    "description": "Platforms for selling products and services online.",
+    "icon_name": "folder",
+    "is_active": true,
+    "display_order": 0
+  }
+},
+{
+  "model": "categories.category",
+  "pk": "74795ee2-3545-4bf4-b972-e43390124924",
+  "fields": {
+    "created_at": "2026-10-26T13:48:44.230Z",
+    "updated_at": "2026-10-26T13:49:00.218Z",
+    "name": "Generative AI",
+    "slug": "generative-ai",
+    "description": "Tools that generate text, images, audio, video, or code.",
+    "icon_name": "folder",
+    "is_active": true,
+    "display_order": 0
+  }
+},
+{
+  "model": "categories.category",
+  "pk": "a7c43838-585e-49d9-8160-5e281aac9371",
+  "fields": {
+    "created_at": "2026-10-26T13:52:31.096Z",
+    "updated_at": "2026-10-26T13:52:31.096Z",
+    "name": "Machine Learning",
+    "slug": "machine-learning",
+    "description": "Products that learn patterns from data and make predictions.",
+    "icon_name": "folder",
+    "is_active": true,
+    "display_order": 0
+  }
+},
+{
+  "model": "categories.category",
+  "pk": "ad08afcb-4360-4f8c-b8f8-5cc31cbede64",
+  "fields": {
+    "created_at": "2026-10-26T13:46:30.393Z",
+    "updated_at": "2026-10-26T13:46:45.430Z",
+    "name": "Artificial Intelligence (AI)",
+    "slug": "artificial-intelligence-ai",
+    "description": "Products that use AI to solve problems and automate tasks.",
+    "icon_name": "folder",
+    "is_active": true,
+    "display_order": 0
+  }
+},
+{
+  "model": "categories.category",
+  "pk": "dc150476-c774-4593-b5bb-b2c1aee179e6",
+  "fields": {
+    "created_at": "2026-10-26T13:51:45.401Z",
+    "updated_at": "2026-10-26T13:51:45.401Z",
+    "name": "AI Agents",
+    "slug": "ai-agents",
+    "description": "AI systems that perform tasks and workflows autonomously.",
+    "icon_name": "folder",
+    "is_active": true,
+    "display_order": 0
+  }
+},
+{
+  "model": "products.products",
+  "pk": "5e477d11-2e0b-4a29-9544-018550c84ae4",
+  "fields": {
+    "created_at": "2026-10-30T11:48:49.063Z",
+    "updated_at": "2026-10-30T11:48:51.635Z",
+    "owner": [
+      "eba@gmail.com"
+    ],
+    "title": "RIDE",
+    "slug": "ride",
+    "tagline": "RIDEEE",
+    "description": "fffffffffffffffrrrrr",
+    "website_url": "https://edulinket.com/tutoring",
+    "demo_url": "https://edulinket.com/tutoring",
+    "status": "draft",
+    "logo_public_id": "launchafrica/products/5e477d11-2e0b-4a29-9544-018550c84ae4/logo",
+    "logo_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793360930/launchafrica/products/5e477d11-2e0b-4a29-9544-018550c84ae4/logo.jpg",
+    "country": "Ethiopia",
+    "languages": [],
+    "published_at": null,
+    "categories": []
+  }
+},
+{
+  "model": "products.products",
+  "pk": "bfb6f8b3-6d1e-46db-b793-11b3630cba5e",
+  "fields": {
+    "created_at": "2026-10-30T10:41:58.450Z",
+    "updated_at": "2026-10-30T10:41:58.450Z",
+    "owner": [
+      "eba@gmail.com"
+    ],
+    "title": "Suqe",
+    "slug": "suqe",
+    "tagline": "#dddd",
+    "description": "Some Character for Testing",
+    "website_url": "https://edulinket.com/tutoring",
+    "demo_url": "",
+    "status": "draft",
+    "logo_public_id": "",
+    "logo_url": "",
+    "country": "Ethiopia",
+    "languages": [],
+    "published_at": null,
+    "categories": []
+  }
+},
+{
+  "model": "products.products",
+  "pk": "df143886-615e-4ed6-a9df-c96746873a8c",
+  "fields": {
+    "created_at": "2026-10-30T10:52:17.612Z",
+    "updated_at": "2026-10-30T11:23:26.945Z",
+    "owner": [
+      "eba@gmail.com"
+    ],
+    "title": "Suqe market Place",
+    "slug": "suqe-market-place",
+    "tagline": "EveryOne",
+    "description": "Everyone has A shop In Ethiopia nd",
+    "website_url": "https://edulinket.com/tutoring",
+    "demo_url": "",
+    "status": "published",
+    "logo_public_id": "launchafrica/products/df143886-615e-4ed6-a9df-c96746873a8c/logo",
+    "logo_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793357539/launchafrica/products/df143886-615e-4ed6-a9df-c96746873a8c/logo.jpg",
+    "country": "Ethiopia",
+    "languages": [],
+    "published_at": "2026-10-30T11:23:26.945Z",
+    "categories": []
+  }
+},
+{
+  "model": "products.products",
+  "pk": "e9a1948f-231f-4c48-b3ec-76ba01511c3a",
+  "fields": {
+    "created_at": "2026-10-30T15:08:32.912Z",
+    "updated_at": "2026-10-30T15:08:34.668Z",
+    "owner": [
+      "eba@gmail.com"
+    ],
+    "title": "Suqe",
+    "slug": "suqe-2",
+    "tagline": "EverOne Has Shoop",
+    "description": "EverOne Has Shoop EverOne Has Shoop",
+    "website_url": "https://edulinket.com/tutoring",
+    "demo_url": "",
+    "status": "draft",
+    "logo_public_id": "launchafrica/products/e9a1948f-231f-4c48-b3ec-76ba01511c3a/logo",
+    "logo_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793372914/launchafrica/products/e9a1948f-231f-4c48-b3ec-76ba01511c3a/logo.png",
+    "country": "Ethiopia",
+    "languages": [],
+    "published_at": null,
+    "categories": [
+      "13b757db-151b-4a53-936f-cd31581abd10",
+      "74795ee2-3545-4bf4-b972-e43390124924"
+    ]
+  }
+},
+{
+  "model": "products.productimage",
+  "pk": "440acc5f-aea6-49a0-b678-02b1d7679f85",
+  "fields": {
+    "created_at": "2026-10-30T15:09:02.905Z",
+    "updated_at": "2026-10-30T15:09:02.905Z",
+    "product": "e9a1948f-231f-4c48-b3ec-76ba01511c3a",
+    "public_id": "launchafrica/products/e9a1948f-231f-4c48-b3ec-76ba01511c3a/images/ljxahsknvlfjaplgoron",
+    "secure_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793372942/launchafrica/products/e9a1948f-231f-4c48-b3ec-76ba01511c3a/images/ljxahsknvlfjaplgoron.jpg",
+    "alt_text": "Gemini Generated Image lbkpxtlbkpxtlbkp",
+    "display_order": 0,
+    "is_primary": true
+  }
+},
+{
+  "model": "products.productimage",
+  "pk": "4aed17d8-b25c-4525-9ddc-01fd170e5136",
+  "fields": {
+    "created_at": "2026-10-30T10:52:34.964Z",
+    "updated_at": "2026-10-30T10:52:34.964Z",
+    "product": "df143886-615e-4ed6-a9df-c96746873a8c",
+    "public_id": "launchafrica/products/df143886-615e-4ed6-a9df-c96746873a8c/images/gykgqsrtqidbjgcswdxf",
+    "secure_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793357553/launchafrica/products/df143886-615e-4ed6-a9df-c96746873a8c/images/gykgqsrtqidbjgcswdxf.png",
+    "alt_text": "suqe",
+    "display_order": 1,
+    "is_primary": false
+  }
+},
+{
+  "model": "products.productimage",
+  "pk": "50671206-e8d6-4125-a4a8-dca175b20a66",
+  "fields": {
+    "created_at": "2026-10-30T15:09:05.577Z",
+    "updated_at": "2026-10-30T15:09:05.577Z",
+    "product": "e9a1948f-231f-4c48-b3ec-76ba01511c3a",
+    "public_id": "launchafrica/products/e9a1948f-231f-4c48-b3ec-76ba01511c3a/images/lohbga1sffvhjdlhd0cr",
+    "secure_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793372945/launchafrica/products/e9a1948f-231f-4c48-b3ec-76ba01511c3a/images/lohbga1sffvhjdlhd0cr.png",
+    "alt_text": "unnamed",
+    "display_order": 2,
+    "is_primary": false
+  }
+},
+{
+  "model": "products.productimage",
+  "pk": "87a4afce-5012-4095-825c-88e6e6cae69c",
+  "fields": {
+    "created_at": "2026-10-30T15:09:04.720Z",
+    "updated_at": "2026-10-30T15:09:04.720Z",
+    "product": "e9a1948f-231f-4c48-b3ec-76ba01511c3a",
+    "public_id": "launchafrica/products/e9a1948f-231f-4c48-b3ec-76ba01511c3a/images/tf5tjha63ysxacj9lbwd",
+    "secure_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793372944/launchafrica/products/e9a1948f-231f-4c48-b3ec-76ba01511c3a/images/tf5tjha63ysxacj9lbwd.png",
+    "alt_text": "suqe",
+    "display_order": 1,
+    "is_primary": false
+  }
+},
+{
+  "model": "products.productimage",
+  "pk": "a0b79bec-8e82-40c6-a921-8b18c0999254",
+  "fields": {
+    "created_at": "2026-10-30T10:52:33.278Z",
+    "updated_at": "2026-10-30T10:52:33.278Z",
+    "product": "df143886-615e-4ed6-a9df-c96746873a8c",
+    "public_id": "launchafrica/products/df143886-615e-4ed6-a9df-c96746873a8c/images/t35uq2wclpgw0nbhqx5r",
+    "secure_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793357552/launchafrica/products/df143886-615e-4ed6-a9df-c96746873a8c/images/t35uq2wclpgw0nbhqx5r.jpg",
+    "alt_text": "Gemini Generated Image lbkpxtlbkpxtlbkp",
+    "display_order": 0,
+    "is_primary": true
+  }
+},
+{
+  "model": "products.productimage",
+  "pk": "a35dd9d9-96d3-4c9f-b2f4-ffc1fb4571c5",
+  "fields": {
+    "created_at": "2026-10-30T10:52:35.693Z",
+    "updated_at": "2026-10-30T10:52:35.693Z",
+    "product": "df143886-615e-4ed6-a9df-c96746873a8c",
+    "public_id": "launchafrica/products/df143886-615e-4ed6-a9df-c96746873a8c/images/ljbusxryksu5im0xocgx",
+    "secure_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793357555/launchafrica/products/df143886-615e-4ed6-a9df-c96746873a8c/images/ljbusxryksu5im0xocgx.png",
+    "alt_text": "unnamed",
+    "display_order": 2,
+    "is_primary": false
+  }
+},
+{
+  "model": "products.productimage",
+  "pk": "aad4dbd0-aeed-4378-89a2-1dbac4e5ff93",
+  "fields": {
+    "created_at": "2026-10-30T11:49:24.710Z",
+    "updated_at": "2026-10-30T11:49:24.710Z",
+    "product": "5e477d11-2e0b-4a29-9544-018550c84ae4",
+    "public_id": "launchafrica/products/5e477d11-2e0b-4a29-9544-018550c84ae4/images/jwji7kljv2d6ric2pmoq",
+    "secure_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793360964/launchafrica/products/5e477d11-2e0b-4a29-9544-018550c84ae4/images/jwji7kljv2d6ric2pmoq.jpg",
+    "alt_text": "Gemini Generated Image lbkpxtlbkpxtlbkp",
+    "display_order": 0,
+    "is_primary": true
+  }
+},
+{
+  "model": "products.productimage",
+  "pk": "c94959fe-2aab-40ae-8141-9447cb49cc76",
+  "fields": {
+    "created_at": "2026-10-30T11:49:25.780Z",
+    "updated_at": "2026-10-30T11:49:25.780Z",
+    "product": "5e477d11-2e0b-4a29-9544-018550c84ae4",
+    "public_id": "launchafrica/products/5e477d11-2e0b-4a29-9544-018550c84ae4/images/xp9e67dwjpnggnvkw7hn",
+    "secure_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793360965/launchafrica/products/5e477d11-2e0b-4a29-9544-018550c84ae4/images/xp9e67dwjpnggnvkw7hn.png",
+    "alt_text": "suqe",
+    "display_order": 1,
+    "is_primary": false
+  }
+},
+{
+  "model": "products.productimage",
+  "pk": "e3f899fb-6052-4cdc-922a-b8773d131e4b",
+  "fields": {
+    "created_at": "2026-10-30T11:49:26.762Z",
+    "updated_at": "2026-10-30T11:49:26.762Z",
+    "product": "5e477d11-2e0b-4a29-9544-018550c84ae4",
+    "public_id": "launchafrica/products/5e477d11-2e0b-4a29-9544-018550c84ae4/images/t71x8b1kzjlisor1pfyz",
+    "secure_url": "https://res.cloudinary.com/ngbqq5zo/image/upload/v1793360966/launchafrica/products/5e477d11-2e0b-4a29-9544-018550c84ae4/images/t71x8b1kzjlisor1pfyz.png",
+    "alt_text": "unnamed",
+    "display_order": 2,
+    "is_primary": false
+  }
+}
+]

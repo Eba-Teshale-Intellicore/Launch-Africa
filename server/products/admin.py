@@ -25,7 +25,7 @@ class ProductsAdmin(admin.ModelAdmin):
     list_display = (
         "title",
         "owner",
-        "category",
+        "display_categories",
         "status",
         "published_at",
         "created_at",
@@ -33,7 +33,7 @@ class ProductsAdmin(admin.ModelAdmin):
 
     list_filter = (
         "status",
-        "category",
+        "categories",
         "country",
         "created_at",
     )
@@ -43,6 +43,7 @@ class ProductsAdmin(admin.ModelAdmin):
         "tagline",
         "description",
         "owner__email",
+        "categories__name",
     )
 
     readonly_fields = (
@@ -58,6 +59,11 @@ class ProductsAdmin(admin.ModelAdmin):
 
     inlines = [ProductImageInline]
 
+    @admin.display(description="Categories")
+    def display_categories(self, obj):
+        return ", ".join(
+            obj.categories.values_list("name", flat=True)
+        ) or "No categories"
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):

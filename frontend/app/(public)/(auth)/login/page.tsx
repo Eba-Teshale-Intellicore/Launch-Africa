@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -23,7 +23,6 @@ const loginSchema = z.object({
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
-type Theme = "dark" | "light";
 
 function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError<ApiErrorBody>(error)) {
@@ -71,27 +70,7 @@ export default function LoginPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const [theme, setTheme] = useState<Theme>("dark");
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem("la-theme");
-
-    if (saved === "light" || saved === "dark") {
-      document.documentElement.setAttribute("data-theme", saved);
-
-      const frame = window.requestAnimationFrame(() => {
-        setTheme(saved);
-      });
-
-      return () => window.cancelAnimationFrame(frame);
-    }
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    window.localStorage.setItem("la-theme", theme);
-  }, [theme]);
 
   const {
     register,
@@ -122,7 +101,6 @@ export default function LoginPage() {
         // user their credentials failed because the profile request failed.
         console.error("Could not refresh the authenticated user:", error);
       } finally {
-        // Keep this destination if /categories is your intended landing page.
         router.replace("/products");
         router.refresh();
       }
@@ -138,60 +116,15 @@ export default function LoginPage() {
     });
   };
 
-  const toggleTheme = () => {
-    setTheme((current) => (current === "dark" ? "light" : "dark"));
-  };
-
   return (
     <main className="bg-page flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg sm:mx-auto">
         <section className="bg-card border-line rounded-card shadow-card border p-6 sm:p-8">
           <header className="mb-7 text-center">
-            <div className="mb-5 flex items-center justify-center gap-3">
+            <div className="mb-5 flex items-center justify-center">
               <Link href="/" className="font-logo text-logo text-2xl">
                 LAUNCHAFRICA
               </Link>
-
-              <button
-                type="button"
-                onClick={toggleTheme}
-                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-                aria-pressed={theme === "light"}
-                className="btn-soft rounded-pill inline-flex size-9 items-center justify-center"
-              >
-                {theme === "dark" ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
-                  </svg>
-                )}
-              </button>
             </div>
 
             <h1 className="text-main text-2xl font-bold">Welcome back</h1>
@@ -204,20 +137,6 @@ export default function LoginPage() {
           <div className="divider my-6">
             <span className="text-soft text-xs">SIGN IN WITH EMAIL</span>
           </div>
-          {/* <div>
-            <button
-              type="button"
-              disabled
-              title="Google sign-in is not configured yet"
-              className="btn-soft rounded-pill w-full px-4 py-3"
-            >
-              Continue with Google (coming soon)
-            </button>
-
-            <div className="divider my-6">
-              <span className="text-soft text-xs">OR Continue with email</span>
-            </div>
-          </div> */}
 
           <form
             onSubmit={handleSubmit(onSubmit)}

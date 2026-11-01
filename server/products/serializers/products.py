@@ -1,4 +1,6 @@
 
+from django.core.exceptions import ValidationError as DjangoValidationError
+
 from rest_framework import serializers
 
 from categories.models.categories import Category
@@ -13,17 +15,21 @@ class CategorySummarySerializer(serializers.ModelSerializer):
 
 
 class ProductsSerializer(serializers.ModelSerializer):
-    category = CategorySummarySerializer(read_only=True)
+    categories = CategorySummarySerializer(
+        many=True,
+        read_only=True,
+    )
 
-    category_id = serializers.PrimaryKeyRelatedField(
-        source="category",
+    category_ids = serializers.PrimaryKeyRelatedField(
+        source="categories",
         queryset=Category.objects.filter(is_active=True),
+        many=True,
         write_only=True,
+        required=False,
     )
 
     owner = serializers.PrimaryKeyRelatedField(read_only=True)
 
-    # Add the related product images to the response.
     images = ProductImageSerializer(many=True, read_only=True)
 
     class Meta:
@@ -37,12 +43,12 @@ class ProductsSerializer(serializers.ModelSerializer):
             "description",
             "website_url",
             "demo_url",
-            "category",
-            "category_id",
+            "categories",
+            "category_ids",
             "status",
             "logo_public_id",
             "logo_url",
-            "images",  # Add this field.
+            "images",
             "country",
             "languages",
             "published_at",
@@ -61,35 +67,47 @@ class ProductsSerializer(serializers.ModelSerializer):
             "published_at",
             "created_at",
             "updated_at",
+            "categories",
         ]
 
-    # Keep your existing validate_title, validate_tagline,
-    # validate_description, URL, country, languages, and
-    # validate methods below this point unchanged.
+    def validate_category_ids(self, value):
+        category_ids = [category.pk for category in value]
 
+        if len(category_ids) != len(set(category_ids)):
+            raise serializers.ValidationError(
+                "Duplicate categories are not allowed."
+            )
+
+        return value
 
     def validate_title(self, value):
         value = value.strip()
+
         if not value:
             raise serializers.ValidationError(
                 "Product title is required."
             )
+
         return value
 
     def validate_tagline(self, value):
         value = value.strip()
+
         if not value:
             raise serializers.ValidationError(
                 "Product tagline is required."
             )
+
         return value
 
     def validate_description(self, value):
         value = value.strip()
+
         if not value:
             raise serializers.ValidationError(
                 "Product description is required."
             )
+
         return value
 
     def validate_website_url(self, value):
@@ -97,6 +115,7 @@ class ProductsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "The website URL must use HTTPS."
             )
+
         return value
 
     def validate_demo_url(self, value):
@@ -104,9 +123,9 @@ class ProductsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "The demo URL must use HTTPS."
             )
+
         return value
 
-    
     def validate_country(self, value):
         value = value.strip()
 
@@ -118,26 +137,27 @@ class ProductsSerializer(serializers.ModelSerializer):
         return value
 
     def validate_languages(self, value):
-        # Reuse the model's validation rules through a field validator.
         from products.models.products import validate_languages
 
         try:
             validate_languages(value)
-        except Exception as exc:
-            from django.core.exceptions import ValidationError
-
-            if isinstance(exc, ValidationError):
-                raise serializers.ValidationError(exc.messages)
-            raise
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(exc.messages)
 
         return value
 
     def validate(self, attrs):
-        category = attrs.get("category")
+        selected_categories = attrs.get("categories")
 
-        if category is not None and not category.is_active:
+        if selected_categories is None:
+            if self.instance is not None:
+                selected_categories = self.instance.categories.all()
+            else:
+                selected_categories = []
+
+        if not selected_categories:
             raise serializers.ValidationError({
-                "category_id": "Choose an active category."
+                "category_ids": "Choose at least one active category."
             })
 
         return attrs

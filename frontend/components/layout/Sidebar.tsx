@@ -18,7 +18,6 @@ import {
   Settings,
   CircleHelp,
   MessageSquare,
-  X,
   Plus,
   LogOut,
   LoaderCircle,
@@ -27,7 +26,8 @@ import {
 
 import { logoutUser } from "@/src/lib/auth";
 import { clearAuthSession } from "@/src/lib/auth-session";
-import { authKeys } from "@/src/hooks/useCategory";
+import { authKeys, useCurrentUser } from "@/src/hooks/useCategory";
+import { useToast } from "@/components/toast/ToastProvider";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -69,7 +69,12 @@ export default function Sidebar({
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  const { showToast } = useToast();
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Current authenticated user.
+  const { data: user, isLoading: checkingUser } = useCurrentUser();
 
   // Active navigation.
   const isActive = (href: string) =>
@@ -77,8 +82,33 @@ export default function Sidebar({
       ? pathname === "/"
       : pathname === href || pathname.startsWith(`${href}/`);
 
+  // Launch a product: authentication required.
+  const handleLaunchProduct = () => {
+    if (checkingUser) {
+      showToast("Please wait while we verify your account.", "info");
+      return;
+    }
+
+    if (!user) {
+      showToast("Please log in to create and launch a product.", "info");
+      return;
+    }
+
+    // Close mobile sidebar and navigate.
+    onCloseMobileMenu();
+
+    router.push("/products/new");
+  };
+
   // Navigation renderer.
-  const renderNavigation = (items: typeof mainNavigation, title: string) => (
+  const renderNavigation = (
+    items:
+      | typeof mainNavigation
+      | typeof builderNavigation
+      | typeof personalNavigation
+      | typeof bottomNavigation,
+    title: string,
+  ) => (
     <section className="border-b border-line py-3">
       {!collapsed && (
         <h2 className="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-muted">
@@ -91,6 +121,46 @@ export default function Sidebar({
           const active = isActive(item.href);
           const Icon = item.icon;
 
+          // Special authentication handling for Launch a Product.
+          if (item.href === "/products/new") {
+            return (
+              <button
+                key={item.href}
+                type="button"
+                onClick={handleLaunchProduct}
+                title={collapsed ? item.label : undefined}
+                aria-label={item.label}
+                aria-current={active ? "page" : undefined}
+                className={`group relative flex min-h-11 w-full items-center gap-5 rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                  collapsed ? "justify-center" : ""
+                } ${
+                  active
+                    ? "bg-hover font-semibold text-primary"
+                    : "text-secondary hover:bg-hover hover:text-primary"
+                }`}
+              >
+                {active && (
+                  <span className="absolute bottom-2 left-0 top-2 w-1 rounded-r-full bg-main" />
+                )}
+
+                <Icon
+                  size={21}
+                  strokeWidth={active ? 2.5 : 1.8}
+                  className="shrink-0"
+                />
+
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 truncate">{item.label}</span>
+
+                    {active && <ChevronRight size={15} className="text-main" />}
+                  </>
+                )}
+              </button>
+            );
+          }
+
+          // Normal navigation links.
           return (
             <Link
               key={item.href}
@@ -107,7 +177,6 @@ export default function Sidebar({
                   : "text-secondary hover:bg-hover hover:text-primary"
               }`}
             >
-              {/* Active indicator */}
               {active && (
                 <span className="absolute bottom-2 left-0 top-2 w-1 rounded-r-full bg-main" />
               )}
@@ -132,21 +201,26 @@ export default function Sidebar({
     </section>
   );
 
-  // Secure local logout.
+  // Secure logout with toast notifications.
   const handleLogout = async () => {
     if (isLoggingOut) return;
 
     setIsLoggingOut(true);
 
+    showToast("Logging out of your LaunchAfrica account...", "info");
+
+    let logoutFailed = false;
+
     try {
       await logoutUser();
     } catch (error) {
+      logoutFailed = true;
       console.error("Logout request failed:", error);
     } finally {
       // Remove local authentication credentials.
       clearAuthSession();
 
-      // Cancel any ongoing current-user request.
+      // Cancel ongoing current-user requests.
       await queryClient.cancelQueries({
         queryKey: authKeys.me,
       });
@@ -157,9 +231,21 @@ export default function Sidebar({
       // Close mobile navigation.
       onCloseMobileMenu();
 
+      // Show logout result.
+      if (logoutFailed) {
+        showToast(
+          "Your session was cleared locally. The server logout request failed.",
+          "error",
+        );
+      } else {
+        showToast("You have successfully logged out.", "success");
+      }
+
       // Navigate to login.
-      router.replace("/login");
+      router.replace("/");
       router.refresh();
+
+      setIsLoggingOut(false);
     }
   };
 

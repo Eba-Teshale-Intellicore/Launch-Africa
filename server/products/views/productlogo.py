@@ -34,7 +34,7 @@ class ProductLogoUploadView(APIView):
 
     def post(self, request, slug):
         product = get_object_or_404(
-            Products.objects.select_related("owner", "category"),
+            Products.objects.select_related("owner").prefetch_related("categories"),
             slug=slug,
         )
 

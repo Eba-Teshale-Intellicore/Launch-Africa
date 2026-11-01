@@ -21,6 +21,7 @@ import {
 
 import { useCurrentUser } from "@/src/hooks/useCategory";
 import { useGlobalSearch } from "@/src/hooks/useSearch";
+import { useToast } from "@/components/toast/ToastProvider";
 
 type HeaderProps = {
   onToggleSidebar: () => void;
@@ -35,6 +36,9 @@ export default function Header({
 }: HeaderProps) {
   const router = useRouter();
   const searchContainerRef = useRef<HTMLFormElement>(null);
+  const lastNotifiedSearchError = useRef<string | null>(null);
+
+  const { showToast } = useToast();
 
   const [theme, setTheme] = useState<Theme>("dark");
   const [search, setSearch] = useState("");
@@ -82,6 +86,39 @@ export default function Header({
     setTheme(initial);
   }, []);
 
+  // Notify user when autocomplete search fails.
+  useEffect(() => {
+    if (!searchError) {
+      lastNotifiedSearchError.current = null;
+      return;
+    }
+
+    if (
+      !showDropdown ||
+      !canShowResults ||
+      debouncedSearch !== query ||
+      searching
+    ) {
+      return;
+    }
+
+    if (lastNotifiedSearchError.current === debouncedSearch) {
+      return;
+    }
+
+    lastNotifiedSearchError.current = debouncedSearch;
+
+    showToast("Unable to search right now. Please try again.", "error");
+  }, [
+    searchError,
+    showDropdown,
+    canShowResults,
+    debouncedSearch,
+    query,
+    searching,
+    showToast,
+  ]);
+
   // Close search suggestions when clicking outside.
   useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {
@@ -108,6 +145,8 @@ export default function Header({
     window.localStorage.setItem("la-theme", next);
 
     setTheme(next);
+
+    showToast(`Switched to ${next} mode successfully.`, "success");
   };
 
   // Close search UI.
@@ -120,11 +159,29 @@ export default function Header({
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!canSearch) return;
+    if (!canSearch) {
+      showToast("Please enter at least 2 characters to search.", "info");
+      return;
+    }
 
     closeSearch();
 
     router.push(`/search?q=${encodeURIComponent(query)}`);
+  };
+
+  // Create product: authentication required.
+  const handleCreateProduct = () => {
+    if (checkingUser) {
+      showToast("Please wait while we verify your account.", "info");
+      return;
+    }
+
+    if (!user) {
+      showToast("Please log in to create and launch a product.", "info");
+      return;
+    }
+
+    router.push("/products/new");
   };
 
   // Open product.
@@ -467,14 +524,17 @@ export default function Header({
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </button>
 
-          {/* CREATE */}
-          <Link
-            href="/products/new"
-            className="hidden h-10 items-center gap-2 rounded-full bg-hover px-3 text-sm font-semibold transition-colors hover:bg-hover/70 lg:inline-flex"
+          {/* CREATE PRODUCT: AUTHENTICATION REQUIRED */}
+          <button
+            type="button"
+            onClick={handleCreateProduct}
+            disabled={checkingUser}
+            title="Create a product"
+            className="hidden h-10 items-center gap-2 rounded-full bg-hover px-3 text-sm font-semibold transition-colors hover:bg-hover/70 disabled:cursor-wait disabled:opacity-50 lg:inline-flex"
           >
             <Plus size={20} />
             Create
-          </Link>
+          </button>
 
           {/* NOTIFICATIONS */}
           <button
