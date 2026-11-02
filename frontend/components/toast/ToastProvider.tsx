@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
@@ -34,6 +35,8 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 const STORAGE_KEY = "launchafrica-toast-position";
 
+const TOAST_POSITION_EVENT = "launchafrica-toast-position-change";
+
 const validPositions: ToastPosition[] = [
   "top-right",
   "top-left",
@@ -41,50 +44,91 @@ const validPositions: ToastPosition[] = [
   "bottom-left",
 ];
 
+// Read toast position from localStorage.
+function getToastPositionSnapshot(): ToastPosition {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (saved && validPositions.includes(saved as ToastPosition)) {
+      return saved as ToastPosition;
+    }
+  } catch {
+    // Use default position.
+  }
+
+  return "bottom-right";
+}
+
+// Server-side snapshot.
+function getServerToastPositionSnapshot(): ToastPosition {
+  return "bottom-right";
+}
+
+// Subscribe to toast position changes.
+function subscribeToToastPosition(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(TOAST_POSITION_EVENT, callback);
+
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(TOAST_POSITION_EVENT, callback);
+  };
+}
+
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [position, setPositionState] = useState<ToastPosition>("bottom-right");
+  const position = useSyncExternalStore(
+    subscribeToToastPosition,
+    getToastPositionSnapshot,
+    getServerToastPositionSnapshot,
+  );
 
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-
-      if (saved && validPositions.includes(saved as ToastPosition)) {
-        setPositionState(saved as ToastPosition);
-      }
-    } catch {
-      // Keep the default position.
-    }
-  }, []);
-
+  // Change toast position.
   const setPosition = useCallback((next: ToastPosition) => {
-    setPositionState(next);
-
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {
-      // Keep the setting for this session.
+      // Keep the current session functional.
     }
+
+    window.dispatchEvent(new Event(TOAST_POSITION_EVENT));
   }, []);
 
+  // Show toast notification.
   const showToast = useCallback(
     (message: string, type: ToastType = "success", duration = 3000) => {
       const id = Date.now() + Math.random();
 
-      setToasts((current) => [...current, { id, message, type, duration }]);
+      setToasts((current) => [
+        ...current,
+        {
+          id,
+          message,
+          type,
+          duration,
+        },
+      ]);
     },
     [],
   );
 
+  // Dismiss toast notification.
   const dismissToast = useCallback((id: number) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
 
   return (
-    <ToastContext.Provider value={{ showToast, position, setPosition }}>
+    <ToastContext.Provider
+      value={{
+        showToast,
+        position,
+        setPosition,
+      }}
+    >
       {children}
 
+      {/* TOAST CONTAINER */}
       <div
         className={`pointer-events-none fixed z-[100] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-3 ${
           position === "top-right"
@@ -104,6 +148,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// INDIVIDUAL TOAST CARD.
 function ToastCard({
   toast,
   onDismiss,
@@ -111,13 +156,14 @@ function ToastCard({
   toast: ToastItem;
   onDismiss: (id: number) => void;
 }) {
+  // Automatic dismissal.
   useEffect(() => {
     if (toast.duration <= 0) return;
 
     const timer = window.setTimeout(() => onDismiss(toast.id), toast.duration);
 
     return () => window.clearTimeout(timer);
-  }, [toast, onDismiss]);
+  }, [toast.id, toast.duration, onDismiss]);
 
   const styles: Record<ToastType, string> = {
     success: "border-emerald-500/40",
@@ -135,25 +181,29 @@ function ToastCard({
     <div
       role={toast.type === "error" ? "alert" : "status"}
       aria-live={toast.type === "error" ? "assertive" : "polite"}
-      className={`bg-card border-line pointer-events-auto flex items-start gap-3 rounded-card border p-4 shadow-xl ${styles[toast.type]}`}
+      className={`pointer-events-auto flex items-start gap-3 rounded-card border border-line bg-card p-4 shadow-xl ${styles[toast.type]}`}
     >
+      {/* ICON */}
       <span
         aria-hidden="true"
-        className="text-logo2 bg-input flex size-9 shrink-0 items-center justify-center rounded-full font-bold"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-input text-logo2 font-bold"
       >
         {icons[toast.type]}
       </span>
 
+      {/* MESSAGE */}
       <div className="min-w-0 flex-1 pt-1">
         <p className="text-main text-sm font-semibold">LaunchAfrica</p>
-        <p className="text-soft mt-1 break-words text-sm">{toast.message}</p>
+
+        <p className="mt-1 break-words text-sm text-soft">{toast.message}</p>
       </div>
 
+      {/* DISMISS */}
       <button
         type="button"
         onClick={() => onDismiss(toast.id)}
         aria-label="Dismiss notification"
-        className="text-soft hover:text-main rounded-md p-1"
+        className="rounded-md p-1 text-soft hover:text-main"
       >
         ×
       </button>
@@ -161,6 +211,7 @@ function ToastCard({
   );
 }
 
+// CUSTOM HOOK.
 export function useToast() {
   const context = useContext(ToastContext);
 

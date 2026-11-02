@@ -85,7 +85,7 @@ export default function SearchResults() {
         <div className="rounded-xl border border-line p-6">
           <p className="font-semibold">Something went wrong.</p>
           <p className="mt-2 text-sm text-muted">
-            We couldn't load your search results. Please try again.
+            We couldn&apos;t load your search results. Please try again.
           </p>
         </div>
       )}
@@ -94,8 +94,9 @@ export default function SearchResults() {
       {!isLoading && !isFetching && !error && data && (
         <>
           <div className="mb-8 border-b border-line pb-5">
-            <h2 className="text-xl font-bold">Results for "{data.query}"</h2>
-
+            <h2 className="text-xl font-bold">
+              Results for &quot;{data.query}&quot;
+            </h2>
             <p className="mt-2 text-sm text-muted">
               {totalResults} results found
             </p>

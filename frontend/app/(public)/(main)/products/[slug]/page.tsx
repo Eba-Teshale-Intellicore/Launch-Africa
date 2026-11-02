@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 import { useProduct } from "@/src/hooks/useProduct";
 import { useCurrentUser } from "@/src/hooks/useCategory";
 import { AFRICAN_COUNTRIES } from "@/src/constants/african-countries";
 import { useToast } from "@/components/toast/ToastProvider";
-
-type ToastType = "success" | "error" | "info";
 
 export function getAfricanCountryFlag(countryName: string): string {
   return (
@@ -39,13 +37,12 @@ function VoteIcon() {
   );
 }
 
-export default function ProductDetailPage() {
+function ProductDetailContent() {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null,
   );
 
   const { showToast } = useToast();
-  const router = useRouter();
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
 
@@ -520,5 +517,21 @@ export default function ProductDetailPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function ProductDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="bg-page min-h-screen px-4 pt-32 sm:px-6">
+          <p role="status" className="text-soft text-center">
+            Loading product...
+          </p>
+        </main>
+      }
+    >
+      <ProductDetailContent />
+    </Suspense>
   );
 }

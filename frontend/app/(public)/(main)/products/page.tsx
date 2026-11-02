@@ -1,14 +1,14 @@
 "use client";
 
-import Link from "next/link";
-
 import ProductList from "@/components/products/ProductList";
 import { useCurrentUser } from "@/src/hooks/useCategory";
 import { useToast } from "@/components/toast/ToastProvider";
+import { useRouter } from "next/navigation";
 
 export default function ProductsPage() {
   const { data: user, isLoading } = useCurrentUser();
   const { showToast } = useToast();
+  const router = useRouter();
 
   // Create product: authentication required.
   const handleCreateProduct = () => {
@@ -25,7 +25,7 @@ export default function ProductsPage() {
       return;
     }
 
-    window.location.href = "/products/new";
+    router.push("/products/new");
   };
 
   return (
@@ -45,7 +45,7 @@ export default function ProductsPage() {
 
           <p className="text-soft mx-auto mt-6 max-w-3xl text-md leading-7">
             Explore innovative products, discover emerging startups, and connect
-            with the builders shaping Africa's future.
+            with the builders shaping Africa&apos;s future.
           </p>
 
           {/* CREATE PRODUCT */}

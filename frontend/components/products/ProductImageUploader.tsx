@@ -37,7 +37,7 @@ export default function ProductImageUploader({ slug, canManage }: Props) {
   if (isError || !product) {
     return (
       <p role="alert" className="text-error">
-        Could not load this product's images.
+        Could not load this product&apos;s images.
       </p>
     );
   }

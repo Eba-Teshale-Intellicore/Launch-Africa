@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useToast,
-  type ToastPosition,
-} from "@/src/components/toast/ToastProvider";
+import { useToast, type ToastPosition } from "@/components/toast/ToastProvider";
 
 const positions: {
   value: ToastPosition;

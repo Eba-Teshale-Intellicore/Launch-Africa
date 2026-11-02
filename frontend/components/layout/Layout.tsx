@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 
 import Header from "./Header";
 import Sidebar from "./Sidebar";
@@ -39,11 +39,13 @@ export default function Layout({ children }: LayoutProps) {
       {/* MAIN LAYOUT */}
       <div className="flex min-h-screen pt-16">
         {/* SIDEBAR */}
-        <Sidebar
-          collapsed={collapsed}
-          mobileOpen={mobileOpen}
-          onCloseMobileMenu={handleCloseMobileMenu}
-        />
+        <Suspense fallback={<div className="hidden md:block" />}>
+          <Sidebar
+            collapsed={collapsed}
+            mobileOpen={mobileOpen}
+            onCloseMobileMenu={handleCloseMobileMenu}
+          />
+        </Suspense>
 
         {/* PAGE CONTENT */}
         <main className="min-w-0 flex-1">
