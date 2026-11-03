@@ -7,7 +7,6 @@ from categories.serializers.categories import CategorySerializer
 from common.permissions import IsAdminOrReadOnly, is_admin
 
 
-
 def category_queryset_for_user(user):
     """
     Return categories visible to the supplied user.

@@ -6,7 +6,6 @@ from django.db import IntegrityError, transaction
 from accounts.models.profile import Profile
 from accounts.models.user import User
 
-
 EDITABLE_PROFILE_FIELDS = {
     "display_name",
     "bio",

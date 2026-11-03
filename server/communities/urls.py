@@ -1,8 +1,8 @@
 from django.urls import path
 
 from communities.views.comments import (
-    ProductCommentListCreateView,
     CommentDetailView,
+    ProductCommentListCreateView,
 )
 from communities.views.votes import ProductVoteView
 

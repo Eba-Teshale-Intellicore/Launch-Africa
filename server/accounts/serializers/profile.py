@@ -1,7 +1,9 @@
 # accounts/serializers/profile.py
 
 from rest_framework import serializers
+
 from accounts.models.profile import Profile
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(

@@ -6,7 +6,6 @@ from django.db import models
 
 from common.models import BaseModel
 
-
 https_url_validator = URLValidator(schemes=["https"])
 
 

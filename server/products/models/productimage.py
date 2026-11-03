@@ -1,11 +1,11 @@
 
+from django.core.validators import URLValidator
 from django.db import models
 from django.db.models import Q
-from django.core.validators import URLValidator
 
 from common.models import BaseModel
-from .products import Products
 
+from .products import Products
 
 https_url_validator = URLValidator(schemes=["https"])
 

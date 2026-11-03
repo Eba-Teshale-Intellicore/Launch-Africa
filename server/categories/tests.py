@@ -51,11 +51,10 @@ class CategoryModelTests(TestCase):
     def test_duplicate_names_are_rejected_case_insensitively(self):
         Category.objects.create(name="Artificial Intelligence")
 
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                Category.objects.create(
-                    name="ARTIFICIAL INTELLIGENCE",
-                )
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Category.objects.create(
+                name="ARTIFICIAL INTELLIGENCE",
+            )
 
 
 class CategorySerializerTests(TestCase):

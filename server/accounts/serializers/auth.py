@@ -1,9 +1,10 @@
 
-from django.contrib.auth.password_validation import validate_password
-from accounts.models.user import User
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from accounts.models.user import User
 from accounts.services.auth import register_user
 
 

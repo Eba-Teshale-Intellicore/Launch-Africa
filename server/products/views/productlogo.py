@@ -1,9 +1,9 @@
 
-from django.db import transaction
-from django.shortcuts import get_object_or_404
+import logging
 
 import cloudinary.uploader
-
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -14,8 +14,6 @@ from rest_framework.views import APIView
 from common.permissions import is_admin
 from products.models.products import Products
 from products.serializers.products import ProductsSerializer
-
-import logging
 
 logger = logging.getLogger(__name__)
 

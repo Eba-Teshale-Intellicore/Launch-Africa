@@ -1,8 +1,8 @@
 from django.urls import path
 
 from categories.views.categories import (
-    CategoryListCreateView,
     CategoryDetailView,
+    CategoryListCreateView,
 )
 
 app_name = "categories"

@@ -8,9 +8,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
-from common.models import BaseModel
 from categories.models.categories import Category
-
+from common.models import BaseModel
 
 https_url_validator = URLValidator(schemes=["https"])
 

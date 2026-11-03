@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from products.models.products import Products
 from products.models.productimage import ProductImage
+from products.models.products import Products
 
 
 class ProductImageInline(admin.TabularInline):

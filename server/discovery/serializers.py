@@ -1,10 +1,9 @@
 
 from django.contrib.auth import get_user_model
-
 from rest_framework import serializers
 
-from products.models.products import Products
 from categories.models.categories import Category
+from products.models.products import Products
 
 
 class ProductSearchSerializer(serializers.ModelSerializer):

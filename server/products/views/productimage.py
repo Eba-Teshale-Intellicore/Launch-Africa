@@ -2,11 +2,9 @@
 import logging
 
 import cloudinary.uploader
-
 from django.db import transaction
 from django.db.models import Max
 from django.shortcuts import get_object_or_404
-
 from rest_framework import generics
 from rest_framework.exceptions import (
     APIException,
@@ -16,10 +14,9 @@ from rest_framework.exceptions import (
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from common.permissions import is_admin
-from products.models.products import Products
 from products.models.productimage import ProductImage
+from products.models.products import Products
 from products.serializers.productimage import ProductImageSerializer
-
 
 logger = logging.getLogger(__name__)
 

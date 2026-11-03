@@ -2,36 +2,30 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
-from django.utils.encoding import force_str, force_bytes
+from django.utils.encoding import force_bytes, force_str
 from django.utils.http import (
     urlsafe_base64_decode,
     urlsafe_base64_encode,
 )
-
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models.user import User
 from accounts.serializers.auth import (
-    RegisterSerializer,
+    ChangePasswordSerializer,
+    ForgotPasswordSerializer,
     LoginSerializer,
     LogoutSerializer,
-    ForgotPasswordSerializer,
+    RegisterSerializer,
     ResetPasswordSerializer,
-    ChangePasswordSerializer,
 )
 from accounts.serializers.user import UserSerializer
-from accounts.services.auth import reset_password, change_password
-
-
-
-
+from accounts.services.auth import change_password, reset_password
 
 
 class RegisterView(APIView):
